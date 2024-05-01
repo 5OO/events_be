@@ -49,7 +49,7 @@ public class IndividualController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteIndividual(@PathVariable Long id) {
-        return individualService.getIndividualById(id).map(_ -> {
+        return individualService.getIndividualById(id).map(ignored -> {
             individualService.deleteIndividual(id);
             return ResponseEntity.ok().build();
         }).orElseGet(()-> ResponseEntity.notFound().build());

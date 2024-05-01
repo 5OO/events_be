@@ -48,7 +48,7 @@ public class CompanyController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteCompany(@PathVariable Long id) {
-        return companyService.getCompanyById(id).map(_ -> {
+        return companyService.getCompanyById(id).map(ignored -> {
             companyService.deleteCompany(id);
             return ResponseEntity.ok().build();
         }).orElseGet(() -> ResponseEntity.notFound().build());

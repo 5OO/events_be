@@ -47,7 +47,7 @@ public class EventController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteEvent(@PathVariable Long id) {
-        return eventService.getEventById(id).map(_ -> {
+        return eventService.getEventById(id).map(ignored -> {
             eventService.deleteEvent(id);
             return ResponseEntity.ok().build();
         }).orElseGet(() -> ResponseEntity.notFound().build());
