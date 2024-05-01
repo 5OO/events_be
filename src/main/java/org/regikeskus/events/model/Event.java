@@ -11,8 +11,14 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long eventId;
 
+    @Column(nullable = false)
     private String eventName;
+
+    @Column(nullable = false)
     private LocalDateTime eventDateTime;
+
+    @Column(nullable = false)
     private String location;
+
     private String additionalInfo;
 }
