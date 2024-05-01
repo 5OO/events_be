@@ -15,8 +15,12 @@ public class Company {
     @JoinColumn(name = "EVENT_ID", nullable = false)
     private Event event;
 
+    @Column(nullable = false)
     private String legalName;
+
+    @Column(nullable = false)
     private String registrationCode;
+
     private Integer numberOfParticipants;
     private String paymentMethod;
     private String additionalInfo;

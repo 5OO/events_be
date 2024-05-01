@@ -20,8 +20,8 @@ CREATE TABLE Individuals (
 CREATE TABLE Companies (
                            ParticipantID INT AUTO_INCREMENT PRIMARY KEY,
                            EventID INT,
-                           LegalName VARCHAR(255),
-                           RegistrationCode VARCHAR(255),
+                           LegalName VARCHAR(255) NOT NULL ,
+                           RegistrationCode VARCHAR(255) NOT NULL ,
                            NumberOfParticipants INT,
                            PaymentMethod VARCHAR(255),
                            AdditionalInfo VARCHAR(5000),
