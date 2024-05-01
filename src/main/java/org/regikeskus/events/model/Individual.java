@@ -15,9 +15,15 @@ public class Individual {
     @JoinColumn(name = "EVENT_ID", nullable = false)
     private Event event;
 
+    @Column(nullable = false)
     private String firstName;
+
+    @Column(nullable = false)
     private String lastName;
+
+    @Column(nullable = false)
     private String personalID;
+
     private String paymentMethod;
     private String additionalInfo;
 }

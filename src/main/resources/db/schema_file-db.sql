@@ -9,9 +9,9 @@ CREATE TABLE Events (
 CREATE TABLE Individuals (
                              ParticipantID INT AUTO_INCREMENT PRIMARY KEY,
                              EventID INT,
-                             FirstName VARCHAR(255),
-                             LastName VARCHAR(255),
-                             PersonalID VARCHAR(255),
+                             FirstName VARCHAR(255) NOT NULL ,
+                             LastName VARCHAR(255) NOT NULL ,
+                             PersonalID VARCHAR(255) NOT NULL ,
                              PaymentMethod VARCHAR(255),
                              AdditionalInfo VARCHAR(1500),
                              FOREIGN KEY (EventID) REFERENCES Events(EventID)

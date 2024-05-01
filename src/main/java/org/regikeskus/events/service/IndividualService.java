@@ -7,10 +7,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
 public class IndividualService {
+
     private final IndividualRepository individualRepository;
 
     @Transactional(readOnly = true)
@@ -19,8 +21,8 @@ public class IndividualService {
     }
 
     @Transactional(readOnly = true)
-    public Individual getIndividualById(Long id) {
-        return individualRepository.findById(id).orElse(null);
+    public Optional<Individual> getIndividualById(Long id) {
+        return individualRepository.findById(id);
     }
 
     @Transactional
