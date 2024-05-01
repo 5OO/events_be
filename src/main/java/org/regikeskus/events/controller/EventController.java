@@ -31,7 +31,7 @@ public class EventController {
 
     @PostMapping
     public Event createEvent(@RequestBody Event event) {
-        return eventService.saveEvent(event);
+        return eventService.createOrUpdateEvent(event);
     }
 
     @PutMapping("/{id}")
@@ -41,7 +41,7 @@ public class EventController {
             savedEvent.setEventDateTime(eventDetails.getEventDateTime());
             savedEvent.setLocation(eventDetails.getLocation());
             savedEvent.setAdditionalInfo(eventDetails.getAdditionalInfo());
-            Event updatedEvent = eventService.saveEvent(savedEvent);
+            Event updatedEvent = eventService.createOrUpdateEvent(savedEvent);
             return ResponseEntity.ok(updatedEvent);
         }).orElseGet(() -> ResponseEntity.notFound().build());
     }

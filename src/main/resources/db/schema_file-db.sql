@@ -1,8 +1,8 @@
 CREATE TABLE Events (
                         EventID INT AUTO_INCREMENT PRIMARY KEY,
-                        EventName VARCHAR(255),
-                        EventDateTime DATETIME,
-                        Location VARCHAR(255),
+                        EventName VARCHAR(255) NOT NULL ,
+                        EventDateTime DATETIME NOT NULL,
+                        Location VARCHAR(255) NOT NULL,
                         AdditionalInfo VARCHAR(1000)
 );
 
