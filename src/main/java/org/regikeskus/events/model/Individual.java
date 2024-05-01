@@ -12,7 +12,7 @@ public class Individual {
     private Long participantId;
 
     @ManyToOne
-    @JoinColumn(name = "eventId", nullable = false)
+    @JoinColumn(name = "EVENT_ID", nullable = false)
     private Event event;
 
     private String firstName;
