@@ -1,6 +1,7 @@
 package org.regikeskus.events.service;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -79,5 +80,15 @@ class IndividualServiceTest {
         verify(individualRepository).save(individual);
     }
 
+    @Test
+    @DisplayName("createOrUpdateIndividual test fails with missing Name")
+    void testCreateOrUpdateIndividual_FailureMissingName() {
+        Individual individual = new Individual(1L, null, null, "Saar", "51107121760", "Bank Transfer", "No allergies");
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> individualService.createOrUpdateIndividual(individual));
+
+        assertEquals("Individuals must have Name", exception.getMessage());
+
+    }
 
 }
