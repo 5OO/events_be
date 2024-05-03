@@ -18,8 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -45,6 +44,19 @@ class IndividualServiceTest {
         assertEquals(2, retrievedIndividuals.size());
         assertEquals(individuals, retrievedIndividuals);
         verify(individualRepository).findAll();
+    }
+
+    @Test
+    void testGetIndividualById_Exists() {
+        Optional<Individual> individual = Optional.of(new Individual(1L, null, "Kalju", "Saar", "12345678901", "Bank Transfer", "No allergies"));
+        when(individualRepository.findById(1L)).thenReturn(individual);
+
+        Optional<Individual> foundIndividual = individualService.getIndividualById(1L);
+
+        assertTrue(foundIndividual.isPresent());
+        assertEquals("Kalju", foundIndividual.get().getFirstName());
+        assertEquals("12345678901", foundIndividual.get().getPersonalID());
+        verify(individualRepository).findById(1L);
     }
 
 }
