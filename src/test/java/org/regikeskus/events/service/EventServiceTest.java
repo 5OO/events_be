@@ -81,9 +81,7 @@ class EventServiceTest {
     void testCreateOrUpdateEvent_Failure() {
         Event event = new Event(1L,null,LocalDateTime.now(),"Event location 1" ,"Additional info 1");
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            eventService.createOrUpdateEvent(event);
-        });
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> eventService.createOrUpdateEvent(event));
 
         assertEquals("Event name or date/time or location must not be null", exception.getMessage());
     }
