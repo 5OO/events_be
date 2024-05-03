@@ -1,19 +1,16 @@
 package org.regikeskus.events.service;
 
-import org.aspectj.lang.annotation.Before;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.regikeskus.events.model.Event;
 import org.regikeskus.events.model.Individual;
 import org.regikeskus.events.repository.IndividualRepository;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -56,6 +53,16 @@ class IndividualServiceTest {
         assertTrue(foundIndividual.isPresent());
         assertEquals("Kalju", foundIndividual.get().getFirstName());
         assertEquals("12345678901", foundIndividual.get().getPersonalID());
+        verify(individualRepository).findById(1L);
+    }
+
+    @Test
+    void testGetIndividualById_NotFound() {
+        when(individualRepository.findById(1L)).thenReturn(Optional.empty());
+
+        Optional<Individual> foundIndividual = individualService.getIndividualById(1L);
+
+        assertFalse(foundIndividual.isPresent());
         verify(individualRepository).findById(1L);
     }
 
