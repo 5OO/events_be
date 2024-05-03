@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -62,5 +63,16 @@ class EventServiceTest {
 
         assertFalse(foundEvent.isPresent());
         verify(eventRepository).findById(1L);
+    }
+
+    @Test
+    void testCreateOrUpdateEvent_Success() {
+        Event event = new Event(1L,"Event name 1",LocalDateTime.now(),"Event location 1" ,"Additional info 1");
+        when(eventRepository.save(any(Event.class))).thenReturn(event);
+
+        Event savedEvent = eventService.createOrUpdateEvent(event);
+
+        assertNotNull(savedEvent);
+        verify(eventRepository).save(event);
     }
 }
