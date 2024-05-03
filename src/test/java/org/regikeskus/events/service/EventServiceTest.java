@@ -53,4 +53,14 @@ class EventServiceTest {
         assertEquals("Event location 1", foundEvent.get().getLocation());
         verify(eventRepository).findById(1L);
     }
+
+    @Test
+    void testGetEventById_NotFound() {
+        when(eventRepository.findById(1L)).thenReturn(Optional.empty());
+
+        Optional<Event> foundEvent = eventService.getEventById(1L);
+
+        assertFalse(foundEvent.isPresent());
+        verify(eventRepository).findById(1L);
+    }
 }
