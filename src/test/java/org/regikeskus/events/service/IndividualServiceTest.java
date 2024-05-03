@@ -91,4 +91,16 @@ class IndividualServiceTest {
 
     }
 
+@Test
+    @DisplayName("createOrUpdateIndividual test fails with Personal ID")
+    void testCreateOrUpdateIndividual_FailurePersonalId() {
+        Individual individual = new Individual(1L, null, "Kalju", "Saar", "12345678901", "Bank Transfer", "No allergies");
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> individualService.createOrUpdateIndividual(individual));
+
+        assertEquals("Invalid Estonian Personal ID.", exception.getMessage());
+
+    }
+
+
 }
