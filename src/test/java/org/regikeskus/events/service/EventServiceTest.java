@@ -11,9 +11,9 @@ import org.regikeskus.events.repository.EventRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -39,5 +39,18 @@ class EventServiceTest {
         assertEquals(2, retrievedEvents.size());
         assertEquals(events, retrievedEvents);
         verify(eventRepository).findAll();
+    }
+
+    @Test
+    void testGetEventById_Exists() {
+        Optional<Event> event = Optional.of(new Event(1L,"Event name 1",LocalDateTime.now(),"Event location 1" ,"Additional info 1"));
+        when(eventRepository.findById(1L)).thenReturn(event);
+
+        Optional<Event> foundEvent = eventService.getEventById(1L);
+
+        assertTrue(foundEvent.isPresent());
+        assertEquals("Event name 1", foundEvent.get().getEventName());
+        assertEquals("Event location 1", foundEvent.get().getLocation());
+        verify(eventRepository).findById(1L);
     }
 }
