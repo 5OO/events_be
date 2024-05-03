@@ -11,11 +11,13 @@ import org.regikeskus.events.model.Event;
 import org.regikeskus.events.model.Individual;
 import org.regikeskus.events.repository.IndividualRepository;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -65,5 +67,17 @@ class IndividualServiceTest {
         assertFalse(foundIndividual.isPresent());
         verify(individualRepository).findById(1L);
     }
+
+    @Test
+    void testCreateOrUpdateIndividual_Success() {
+        Individual individual = new Individual(1L, null, "Kalju", "Saar", "51107121760", "Bank Transfer", "No allergies");
+        when(individualRepository.save(any(Individual.class))).thenReturn(individual);
+
+        Individual savedIndividual = individualService.createOrUpdateIndividual(individual);
+
+        assertNotNull(savedIndividual);
+        verify(individualRepository).save(individual);
+    }
+
 
 }
