@@ -1,6 +1,5 @@
 package org.regikeskus.events.service;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -8,11 +7,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.regikeskus.events.model.Event;
 import org.regikeskus.events.model.Individual;
 import org.regikeskus.events.repository.IndividualRepository;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -91,7 +88,7 @@ class IndividualServiceTest {
 
     }
 
-@Test
+    @Test
     @DisplayName("createOrUpdateIndividual test fails with Personal ID")
     void testCreateOrUpdateIndividual_FailurePersonalId() {
         Individual individual = new Individual(1L, null, "Kalju", "Saar", "12345678901", "Bank Transfer", "No allergies");
@@ -102,5 +99,13 @@ class IndividualServiceTest {
 
     }
 
+    @Test
+    @DisplayName("DeleteIndividual test")
+    void testDeleteIndividual() {
+        Long id = 1L;
 
+        individualService.deleteIndividual(id);
+
+        Mockito.verify(individualRepository, Mockito.times(1)).deleteById(id);
+    }
 }
