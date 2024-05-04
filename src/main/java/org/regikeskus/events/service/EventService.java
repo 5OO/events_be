@@ -40,7 +40,7 @@ public class EventService {
 
     private void validateEvent(Event event) {
         if (event.getEventName() == null || event.getEventDateTime() == null || event.getLocation() == null) {
-            throw new EventValidationException("Event name, date/time, or location must not be null");
+            throw new EventValidationException("Event name or date/time or location must not be null");
         }
     }
 

@@ -5,6 +5,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.regikeskus.events.exception.EventNotFoundException;
+import org.regikeskus.events.exception.EventValidationException;
 import org.regikeskus.events.model.Event;
 import org.regikeskus.events.repository.EventRepository;
 
@@ -15,8 +17,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class EventServiceTest {
@@ -57,11 +58,12 @@ class EventServiceTest {
 
     @Test
     void testGetEventById_NotFound() {
-        when(eventRepository.findById(1L)).thenReturn(Optional.empty());
+        Long id = 1L;
+        when(eventRepository.findById(id)).thenReturn(Optional.empty());
 
-        Optional<Event> foundEvent = eventService.getEventById(1L);
+        Exception exception = assertThrows(EventNotFoundException.class, () -> eventService.getEventById(id));
 
-        assertFalse(foundEvent.isPresent());
+        assertEquals("Event not found with ID: " + id, exception.getMessage());
         verify(eventRepository).findById(1L);
     }
 
@@ -80,18 +82,31 @@ class EventServiceTest {
     void testCreateEvent_Failure() {
         Event event = new Event(1L,null,LocalDateTime.now(),"Event location 1" ,"Additional info 1");
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> eventService.createEvent(event));
+        Exception exception = assertThrows(EventValidationException.class, () -> eventService.createEvent(event));
 
         assertEquals("Event name or date/time or location must not be null", exception.getMessage());
     }
 
     @Test
-    void testDeleteEvent() {
+    void testDeleteEvent_FutureEvent() {
         Long id = 1L;
+        Event futureEvent = new Event(1L, "Future Event", LocalDateTime.now().plusDays(1), "Future Location", "Details");
+        when(eventRepository.findById(id)).thenReturn(Optional.of(futureEvent));
 
         eventService.deleteEvent(id);
 
         verify(eventRepository).deleteById(id);
     }
 
+    @Test
+    void testDeleteEvent_PastEvent() {
+        Long id = 1L;
+        Event pastEvent = new Event(1L, "Past Event", LocalDateTime.now().minusDays(1), "Past Location", "Details");
+        when(eventRepository.findById(id)).thenReturn(Optional.of(pastEvent));
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> eventService.deleteEvent(id));
+
+        assertEquals("Cannot delete past events.", exception.getMessage());
+        verify(eventRepository, never()).deleteById(any());
+    }
 }
