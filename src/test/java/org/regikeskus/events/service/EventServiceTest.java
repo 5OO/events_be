@@ -66,21 +66,21 @@ class EventServiceTest {
     }
 
     @Test
-    void testCreateOrUpdateEvent_Success() {
+    void testCreateEvent_Success() {
         Event event = new Event(1L,"Event name 1",LocalDateTime.now(),"Event location 1" ,"Additional info 1");
         when(eventRepository.save(any(Event.class))).thenReturn(event);
 
-        Event savedEvent = eventService.createOrUpdateEvent(event);
+        Event savedEvent = eventService.createEvent(event);
 
         assertNotNull(savedEvent);
         verify(eventRepository).save(event);
     }
 
     @Test
-    void testCreateOrUpdateEvent_Failure() {
+    void testCreateEvent_Failure() {
         Event event = new Event(1L,null,LocalDateTime.now(),"Event location 1" ,"Additional info 1");
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> eventService.createOrUpdateEvent(event));
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> eventService.createEvent(event));
 
         assertEquals("Event name or date/time or location must not be null", exception.getMessage());
     }
