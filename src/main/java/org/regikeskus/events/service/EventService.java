@@ -28,7 +28,7 @@ public class EventService {
     }
 
     @Transactional
-    public Event createOrUpdateEvent(Event event) {
+    public Event createEvent(Event event) {
         if (event.getEventName() == null || event.getEventDateTime() == null || event.getLocation() == null) {
             throw new IllegalArgumentException("Event name or date/time or location must not be null");
         }
