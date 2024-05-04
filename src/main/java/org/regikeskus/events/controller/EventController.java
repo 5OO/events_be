@@ -18,8 +18,9 @@ public class EventController {
     private final EventService eventService;
 
     @GetMapping
-    public List<Event> getAllEvents() {
-        return eventService.getAllEvents();
+    public ResponseEntity<List<Event>> getAllEvents() {
+        List<Event> events = eventService.getAllEvents();
+        return ResponseEntity.ok(events);
     }
 
     @GetMapping("/{id}")
@@ -30,9 +31,13 @@ public class EventController {
     }
 
     @PostMapping
-    public ResponseEntity<Event> createEvent(@RequestBody Event event) {
-        Event createdEvent = eventService.createEvent(event);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdEvent);
+    public ResponseEntity<Object> createEvent(@RequestBody Event event) {
+        try {
+            Event createdEvent = eventService.createEvent(event);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdEvent);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Invalid request: " + e.getMessage());
+        }
     }
 
 
