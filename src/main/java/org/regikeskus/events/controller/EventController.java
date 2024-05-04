@@ -3,10 +3,12 @@ package org.regikeskus.events.controller;
 import lombok.RequiredArgsConstructor;
 import org.regikeskus.events.model.Event;
 import org.regikeskus.events.service.EventService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RequiredArgsConstructor
 @RestController
@@ -36,14 +38,14 @@ public class EventController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Event> updateEvent(@PathVariable Long id, @RequestBody Event eventDetails) {
-        return eventService.getEventById(id).map(savedEvent -> {
-            savedEvent.setEventName(eventDetails.getEventName());
-            savedEvent.setEventDateTime(eventDetails.getEventDateTime());
-            savedEvent.setLocation(eventDetails.getLocation());
-            savedEvent.setAdditionalInfo(eventDetails.getAdditionalInfo());
-            Event updatedEvent = eventService.createOrUpdateEvent(savedEvent);
+        try {
+            Event updatedEvent = eventService.updateEvent(id, eventDetails);
             return ResponseEntity.ok(updatedEvent);
-        }).orElseGet(() -> ResponseEntity.notFound().build());
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @DeleteMapping("/{id}")

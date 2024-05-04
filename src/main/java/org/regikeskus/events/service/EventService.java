@@ -36,6 +36,17 @@ public class EventService {
     }
 
     @Transactional
+    public Event updateEvent(Long id, Event eventDetails) {
+        Event event = eventRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Event not found with ID: " + id));
+
+        event.setEventName(eventDetails.getEventName());
+        event.setEventDateTime(eventDetails.getEventDateTime());
+        event.setLocation(eventDetails.getLocation());
+        event.setAdditionalInfo(eventDetails.getAdditionalInfo());
+        return eventRepository.save(event);
+    }
+
+    @Transactional
     public void deleteEvent(Long id) {
         Event event = eventRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Event not found with ID: " + id));
 
