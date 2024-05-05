@@ -22,6 +22,16 @@ public class EventService {
     private final EventRepository eventRepository;
 
     @Transactional(readOnly = true)
+    public List<Event> getAllFutureOrCurrentEvents() {
+        return eventRepository.findAllFutureOrCurrentEvents(LocalDateTime.now());
+    }
+
+    @Transactional(readOnly = true)
+    public List<Event> getAllPastEvents() {
+        return eventRepository.findAllPastEvents(LocalDateTime.now());
+    }
+
+    @Transactional(readOnly = true)
     public List<Event> getAllEvents() {
         return eventRepository.findAll();
     }

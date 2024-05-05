@@ -17,6 +17,18 @@ public class EventController {
 
     private final EventService eventService;
 
+    @GetMapping("/future")
+    public ResponseEntity<List<Event>> getAllFutureOrCurrentEvents() {
+        List<Event> events = eventService.getAllFutureOrCurrentEvents();
+        return ResponseEntity.ok(events);
+    }
+
+    @GetMapping("/past")
+    public ResponseEntity<List<Event>> getAllPastEvents() {
+        List<Event> events = eventService.getAllPastEvents();
+        return ResponseEntity.ok(events);
+    }
+
     @GetMapping
     public ResponseEntity<List<Event>> getAllEvents() {
         List<Event> events = eventService.getAllEvents();
