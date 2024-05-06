@@ -17,7 +17,7 @@ import java.util.Optional;
 @Service
 public class EventService {
 
-    private static final String EVENT_NOT_FOUND_MESSAGE = "Event not found with ID: ";
+    private static final String EVENT_NOT_FOUND_MESSAGE = "Event not found with event-ID: ";
 
     private final EventRepository eventRepository;
 
@@ -72,6 +72,7 @@ public class EventService {
         if (event.getEventDateTime().isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("Cannot delete past events.");
         }
+// todo siia oleks tarvis lsiada, et ürituse kustutamise käigus kustutatakse ka osalejad ära!
 
         eventRepository.deleteById(id);
     }

@@ -19,13 +19,13 @@ public class CompanyController {
     @GetMapping
     public List<Company> getAllCompanies() {
         return companyService.getAllCompanies();
-    }
+    } // TODO verify if it is really needed. might be obsolete.
 
     @GetMapping("/{id}")
     public ResponseEntity<Company> getCompanyById(@PathVariable Long id) {
         Optional<Company> company = companyService.getCompanyById(id);
         return company.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    }
+    } //todo siia on tarvis, et otsi ettevõtteid ürituse ID järgi, kes on sellele ürr-le end kirja pannud?
 
     @PostMapping
     public ResponseEntity<Company> createCompany(@RequestBody Company company) {
