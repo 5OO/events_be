@@ -67,11 +67,11 @@ class IndividualServiceTest {
     }
 
     @Test
-    void testCreateOrUpdateIndividual_Success() {
+    void testCreateIndividual_Success() {
         Individual individual = new Individual(1L, null, "Kalju", "Saar", "51107121760", "Bank Transfer", "No allergies");
         when(individualRepository.save(any(Individual.class))).thenReturn(individual);
 
-        Individual savedIndividual = individualService.createOrUpdateIndividual(individual);
+        Individual savedIndividual = individualService.createIndividual(individual);
 
         assertNotNull(savedIndividual);
         verify(individualRepository).save(individual);
@@ -79,10 +79,10 @@ class IndividualServiceTest {
 
     @Test
     @DisplayName("createOrUpdateIndividual test fails with missing Name")
-    void testCreateOrUpdateIndividual_FailureMissingName() {
+    void testCreateIndividual_FailureMissingName() {
         Individual individual = new Individual(1L, null, null, "Saar", "51107121760", "Bank Transfer", "No allergies");
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> individualService.createOrUpdateIndividual(individual));
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> individualService.createIndividual(individual));
 
         assertEquals("Individuals must have Name", exception.getMessage());
 
@@ -90,10 +90,10 @@ class IndividualServiceTest {
 
     @Test
     @DisplayName("createOrUpdateIndividual test fails with Personal ID")
-    void testCreateOrUpdateIndividual_FailurePersonalId() {
+    void testCreateIndividual_FailurePersonalId() {
         Individual individual = new Individual(1L, null, "Kalju", "Saar", "12345678901", "Bank Transfer", "No allergies");
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> individualService.createOrUpdateIndividual(individual));
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> individualService.createIndividual(individual));
 
         assertEquals("Invalid Estonian Personal ID.", exception.getMessage());
 

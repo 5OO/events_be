@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RequiredArgsConstructor
 @RestController
@@ -19,7 +20,7 @@ public class IndividualController {
     @GetMapping
     public List<Individual> getAllIndividuals() {
         return individualService.getAllIndividuals();
-    }
+    } // TODO verify if it is really needed. might be obsolete.
 
     @GetMapping("/{id}")
     public ResponseEntity<Individual> getIndividualById(@PathVariable Long id) {
@@ -28,30 +29,36 @@ public class IndividualController {
                 .orElseGet(()-> ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/event/{eventId}/individuals")
+    public ResponseEntity<List<Individual>> getIndividualsByEventId(@PathVariable Long eventId) {
+        List<Individual> individuals = individualService.getIndividualsByEventId(eventId);
+        if (individuals.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(individuals);
+    }
+
     @PostMapping
     public ResponseEntity<Individual> createIndividual(@RequestBody Individual individual) {
-        Individual savedIndividual = individualService.createOrUpdateIndividual(individual);
+        Individual savedIndividual = individualService.createIndividual(individual);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedIndividual);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Individual> updateIndividual(@PathVariable Long id, @RequestBody Individual individual) {
-        return individualService.getIndividualById(id).map(savedIndividual -> {
-            savedIndividual.setFirstName(individual.getFirstName());
-            savedIndividual.setLastName(individual.getLastName());
-            savedIndividual.setPersonalID(individual.getPersonalID());
-            savedIndividual.setPaymentMethod(individual.getPaymentMethod());
-            savedIndividual.setAdditionalInfo(individual.getAdditionalInfo());
-            Individual updatedIndividual = individualService.createOrUpdateIndividual(savedIndividual);
+        try {
+            Individual updatedIndividual = individualService.updateIndividual(id, individual);
             return ResponseEntity.ok(updatedIndividual);
-        }).orElseGet(() -> ResponseEntity.notFound().build());
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteIndividual(@PathVariable Long id) {
-        return individualService.getIndividualById(id).map(ignored -> {
-            individualService.deleteIndividual(id);
-            return ResponseEntity.ok().build();
-        }).orElseGet(()-> ResponseEntity.notFound().build());
+        individualService.deleteIndividual(id);
+        return ResponseEntity.ok().build();
     }
 }

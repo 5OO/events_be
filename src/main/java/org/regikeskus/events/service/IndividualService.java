@@ -1,6 +1,7 @@
 package org.regikeskus.events.service;
 
 import lombok.RequiredArgsConstructor;
+import org.regikeskus.events.exception.IndividualNotFoundException;
 import org.regikeskus.events.model.Individual;
 import org.regikeskus.events.repository.IndividualRepository;
 import org.regikeskus.events.validation.IdValidationUtils;
@@ -14,6 +15,8 @@ import java.util.Optional;
 @Service
 public class IndividualService {
 
+    private static final String INDIVIDUAL_NOT_FOUND_MESSAGE = "Individual not found with participant-ID: ";
+
     private final IndividualRepository individualRepository;
 
     @Transactional(readOnly = true)
@@ -23,12 +26,18 @@ public class IndividualService {
 
     @Transactional(readOnly = true)
     public Optional<Individual> getIndividualById(Long id) {
-        return individualRepository.findById(id);
+        return Optional.ofNullable(individualRepository.findById(id)
+                .orElseThrow(() -> new IndividualNotFoundException(INDIVIDUAL_NOT_FOUND_MESSAGE + id)));
+    }
+
+    @Transactional(readOnly = true)
+    public List<Individual> getIndividualsByEventId(Long eventId) {
+        return individualRepository.findByEventId(eventId);
     }
 
     @Transactional
-    public Individual createOrUpdateIndividual(Individual individual) {
-        if (individual.getFirstName() == null || individual.getLastName() == null ) {
+    public Individual createIndividual(Individual individual) {
+        if (individual.getFirstName() == null || individual.getLastName() == null) {
             throw new IllegalArgumentException("Individuals must have Name");
         }
         if (!IdValidationUtils.isValidEstonianPersonalId(individual.getPersonalID())) {
@@ -38,7 +47,33 @@ public class IndividualService {
     }
 
     @Transactional
+    public Individual updateIndividual(Long participantID, Individual updatedIndividual) {
+        Individual individual = individualRepository.findById(participantID)
+                .orElseThrow(() -> new IndividualNotFoundException(INDIVIDUAL_NOT_FOUND_MESSAGE + participantID));
+
+        individual.setFirstName(updatedIndividual.getFirstName());
+        individual.setLastName(updatedIndividual.getLastName());
+        individual.setPersonalID(updatedIndividual.getPersonalID());
+        individual.setPaymentMethod(updatedIndividual.getPaymentMethod());
+        individual.setAdditionalInfo(updatedIndividual.getAdditionalInfo());
+
+        validateIndividual(individual);
+        return individualRepository.save(individual);
+    }
+
+    private void validateIndividual(Individual individual) {
+        if (individual.getFirstName() == null || individual.getLastName() == null) {
+            throw new IllegalArgumentException("First name and last name must not be null.");
+        }
+        if (!IdValidationUtils.isValidEstonianPersonalId(individual.getPersonalID())) {
+            throw new IllegalArgumentException("Invalid Estonian Personal ID.");
+        }
+    }
+
+    @Transactional
     public void deleteIndividual(Long id) {
+        individualRepository.findById(id)
+                .orElseThrow(() -> new IndividualNotFoundException(INDIVIDUAL_NOT_FOUND_MESSAGE + id));
         individualRepository.deleteById(id);
     }
 }
