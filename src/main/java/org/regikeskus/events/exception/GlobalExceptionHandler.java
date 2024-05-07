@@ -10,6 +10,11 @@ import java.util.NoSuchElementException;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(IndividualValidationException.class)
+    public ResponseEntity<Object> handleIndividualValidationException(IndividualValidationException exception) {
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(IndividualNotFoundException.class)
     public ResponseEntity<Object> handleIndividualNotFoundException(IndividualNotFoundException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);

@@ -2,6 +2,7 @@ package org.regikeskus.events.service;
 
 import lombok.RequiredArgsConstructor;
 import org.regikeskus.events.exception.IndividualNotFoundException;
+import org.regikeskus.events.exception.IndividualValidationException;
 import org.regikeskus.events.model.Individual;
 import org.regikeskus.events.repository.IndividualRepository;
 import org.regikeskus.events.validation.IdValidationUtils;
@@ -63,10 +64,10 @@ public class IndividualService {
 
     private void validateIndividual(Individual individual) {
         if (individual.getFirstName() == null || individual.getLastName() == null) {
-            throw new IllegalArgumentException("First name and last name must not be null.");
+            throw new IndividualValidationException("First name and last name must not be null.");
         }
         if (!IdValidationUtils.isValidEstonianPersonalId(individual.getPersonalID())) {
-            throw new IllegalArgumentException("Invalid Estonian Personal ID.");
+            throw new IndividualValidationException("Invalid Estonian Personal ID. " + individual.getPersonalID());
         }
     }
 
