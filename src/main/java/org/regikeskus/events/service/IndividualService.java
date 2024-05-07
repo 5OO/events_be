@@ -32,7 +32,7 @@ public class IndividualService {
 
     @Transactional(readOnly = true)
     public List<Individual> getIndividualsByEventId(Long eventId) {
-        return individualRepository.findByEventId(eventId);
+        return individualRepository.findByEvent_EventId(eventId);
     }
 
     @Transactional
