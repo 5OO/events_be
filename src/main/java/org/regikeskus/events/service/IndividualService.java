@@ -38,12 +38,7 @@ public class IndividualService {
 
     @Transactional
     public Individual createIndividual(Individual individual) {
-        if (individual.getFirstName() == null || individual.getLastName() == null) {
-            throw new IllegalArgumentException("Individuals must have Name");
-        }
-        if (!IdValidationUtils.isValidEstonianPersonalId(individual.getPersonalID())) {
-            throw new IllegalArgumentException("Invalid Estonian Personal ID.");
-        }
+        validateIndividual(individual);
         return individualRepository.save(individual);
     }
 
@@ -73,8 +68,8 @@ public class IndividualService {
 
     @Transactional
     public void deleteIndividual(Long id) {
-        individualRepository.findById(id)
-                .orElseThrow(() -> new IndividualNotFoundException(INDIVIDUAL_NOT_FOUND_MESSAGE + id));
-        individualRepository.deleteById(id);
-    }
+        if (!individualRepository.existsById(id)) {
+            throw new IndividualNotFoundException(INDIVIDUAL_NOT_FOUND_MESSAGE + id);
+        }
+        individualRepository.deleteById(id); }
 }
