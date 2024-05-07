@@ -15,9 +15,8 @@ public class Company {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long participantId;
 
-    @ManyToOne
-    @JoinColumn(name = "EVENT_ID", nullable = false)
-    private Event event;
+    @Column(name = "EVENT_ID", nullable = false)
+    private Long eventId;
 
     @Column(nullable = false)
     private String legalName;
