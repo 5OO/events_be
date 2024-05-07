@@ -81,7 +81,7 @@ public class EventService {
             throw new IllegalArgumentException("Cannot delete past events.");
         }
         List<Individual> individuals = individualRepository.findByEventId(id);
-        List<Company> companies = companyRepository.findByEvent_EventId(id);
+        List<Company> companies = companyRepository.findByEventId(id);
 
         individualRepository.deleteAll(individuals);
         companyRepository.deleteAll(companies);

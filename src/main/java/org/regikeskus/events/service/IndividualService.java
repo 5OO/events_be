@@ -2,6 +2,7 @@ package org.regikeskus.events.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.regikeskus.events.exception.EventNotFoundException;
 import org.regikeskus.events.exception.IndividualNotFoundException;
 import org.regikeskus.events.exception.IndividualValidationException;
 import org.regikeskus.events.model.Event;
@@ -49,7 +50,6 @@ public class IndividualService {
             throw new IndividualNotFoundException("Event not found with ID: " + individual.getEventId());
         }
         log.debug("Creating individual with event ID {}", individual.getEventId());
-        log.debug("Saving individual {}", individual);
         return individualRepository.save(individual);
     }
 
@@ -59,7 +59,7 @@ public class IndividualService {
                 .orElseThrow(() -> new IndividualNotFoundException(INDIVIDUAL_NOT_FOUND_MESSAGE + participantID));
 
         if (!eventRepository.existsById(updatedIndividual.getEventId())) {
-            throw new IndividualNotFoundException("Event not found with ID: " + updatedIndividual.getEventId());
+            throw new EventNotFoundException("Event not found with ID: " + updatedIndividual.getEventId());
         }
 
         individual.setFirstName(updatedIndividual.getFirstName());

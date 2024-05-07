@@ -57,5 +57,5 @@ public class EventController {
     public ResponseEntity<Object> deleteEvent(@PathVariable Long id) {
         eventService.deleteEvent(id);
         return ResponseEntity.ok().build();
-    } // TODO kustutada ka isikud ja ettevõtte korraga ära
+    }
 }
