@@ -1,9 +1,12 @@
 package org.regikeskus.events.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.regikeskus.events.exception.IndividualNotFoundException;
 import org.regikeskus.events.exception.IndividualValidationException;
+import org.regikeskus.events.model.Event;
 import org.regikeskus.events.model.Individual;
+import org.regikeskus.events.repository.EventRepository;
 import org.regikeskus.events.repository.IndividualRepository;
 import org.regikeskus.events.validation.IdValidationUtils;
 import org.springframework.stereotype.Service;
@@ -11,12 +14,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class IndividualService {
 
     private static final String INDIVIDUAL_NOT_FOUND_MESSAGE = "Individual not found with participant-ID: ";
 
+    private final EventRepository eventRepository;
     private final IndividualRepository individualRepository;
 
     @Transactional(readOnly = true)
@@ -26,18 +31,25 @@ public class IndividualService {
 
     @Transactional(readOnly = true)
     public Individual getIndividualById(Long id) {
+        log.debug("Retrieving Individuals By participantId {}", id);
         return individualRepository.findById(id)
                 .orElseThrow(() -> new IndividualNotFoundException(INDIVIDUAL_NOT_FOUND_MESSAGE + id));
     }
 
     @Transactional(readOnly = true)
     public List<Individual> getIndividualsByEventId(Long eventId) {
-        return individualRepository.findByEvent_EventId(eventId);
+        log.debug("Retrieving Individuals By EventId {}", eventId);
+        return individualRepository.findByEventId(eventId);
     }
 
     @Transactional
     public Individual createIndividual(Individual individual) {
         validateIndividual(individual);
+        if (!eventRepository.existsById(individual.getEventId())) {
+            throw new IndividualNotFoundException("Event not found with ID: " + individual.getEventId());
+        }
+        log.debug("Creating individual with event ID {}", individual.getEventId());
+        log.debug("Saving individual {}", individual);
         return individualRepository.save(individual);
     }
 
@@ -46,6 +58,10 @@ public class IndividualService {
         Individual individual = individualRepository.findById(participantID)
                 .orElseThrow(() -> new IndividualNotFoundException(INDIVIDUAL_NOT_FOUND_MESSAGE + participantID));
 
+        if (!eventRepository.existsById(updatedIndividual.getEventId())) {
+            throw new IndividualNotFoundException("Event not found with ID: " + updatedIndividual.getEventId());
+        }
+
         individual.setFirstName(updatedIndividual.getFirstName());
         individual.setLastName(updatedIndividual.getLastName());
         individual.setPersonalID(updatedIndividual.getPersonalID());
@@ -53,6 +69,7 @@ public class IndividualService {
         individual.setAdditionalInfo(updatedIndividual.getAdditionalInfo());
 
         validateIndividual(individual);
+        log.debug("Updating individual {} with event ID {}", participantID, individual.getEventId());
         return individualRepository.save(individual);
     }
 
@@ -70,5 +87,6 @@ public class IndividualService {
         if (!individualRepository.existsById(id)) {
             throw new IndividualNotFoundException(INDIVIDUAL_NOT_FOUND_MESSAGE + id);
         }
+        log.debug("Deleting individual {}", id);
         individualRepository.deleteById(id); }
 }

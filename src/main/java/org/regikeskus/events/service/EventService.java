@@ -80,7 +80,7 @@ public class EventService {
         if (event.getEventDateTime().isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("Cannot delete past events.");
         }
-        List<Individual> individuals = individualRepository.findByEvent_EventId(id);
+        List<Individual> individuals = individualRepository.findByEventId(id);
         List<Company> companies = companyRepository.findByEvent_EventId(id);
 
         individualRepository.deleteAll(individuals);
