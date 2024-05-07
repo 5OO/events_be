@@ -14,8 +14,8 @@ CREATE TABLE Individuals (
                              PersonalID VARCHAR(255),
                              PaymentMethod VARCHAR(255),
                              AdditionalInfo VARCHAR(1500),
-                             FOREIGN KEY (EventID) REFERENCES Events(EventID)
-);
+                             FOREIGN KEY (EventID) REFERENCES Events(EventID) ON DELETE CASCADE
+                         );
 
 CREATE TABLE Companies (
                            ParticipantID INT AUTO_INCREMENT PRIMARY KEY,
@@ -25,5 +25,5 @@ CREATE TABLE Companies (
                            NumberOfParticipants INT,
                            PaymentMethod VARCHAR(255),
                            AdditionalInfo VARCHAR(5000),
-                           FOREIGN KEY (EventID) REFERENCES Events(EventID)
-);
+                           FOREIGN KEY (EventID) REFERENCES Events(EventID) ON DELETE CASCADE
+                       );

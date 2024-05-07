@@ -3,8 +3,12 @@ package org.regikeskus.events.service;
 import lombok.RequiredArgsConstructor;
 import org.regikeskus.events.exception.EventNotFoundException;
 import org.regikeskus.events.exception.EventValidationException;
+import org.regikeskus.events.model.Company;
 import org.regikeskus.events.model.Event;
+import org.regikeskus.events.model.Individual;
+import org.regikeskus.events.repository.CompanyRepository;
 import org.regikeskus.events.repository.EventRepository;
+import org.regikeskus.events.repository.IndividualRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +24,8 @@ public class EventService {
     private static final String EVENT_NOT_FOUND_MESSAGE = "Event not found with event-ID: ";
 
     private final EventRepository eventRepository;
+    private final IndividualRepository individualRepository;
+    private final CompanyRepository companyRepository;
 
     @Transactional(readOnly = true)
     public List<Event> getAllFutureOrCurrentEvents() {
@@ -74,8 +80,11 @@ public class EventService {
         if (event.getEventDateTime().isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("Cannot delete past events.");
         }
-// todo siia oleks tarvis lsiada, et ürituse kustutamise käigus kustutatakse ka osalejad ära!
+        List<Individual> individuals = individualRepository.findByEvent_EventId(id);
+        List<Company> companies = companyRepository.findByEvent_EventId(id);
 
+        individualRepository.deleteAll(individuals);
+        companyRepository.deleteAll(companies);
         eventRepository.deleteById(id);
     }
 }
