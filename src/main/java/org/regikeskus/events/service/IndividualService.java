@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -26,9 +25,9 @@ public class IndividualService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<Individual> getIndividualById(Long id) {
-        return Optional.ofNullable(individualRepository.findById(id)
-                .orElseThrow(() -> new IndividualNotFoundException(INDIVIDUAL_NOT_FOUND_MESSAGE + id)));
+    public Individual getIndividualById(Long id) {
+        return individualRepository.findById(id)
+                .orElseThrow(() -> new IndividualNotFoundException(INDIVIDUAL_NOT_FOUND_MESSAGE + id));
     }
 
     @Transactional(readOnly = true)

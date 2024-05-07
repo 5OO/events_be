@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @RequiredArgsConstructor
 @RestController
@@ -24,9 +23,8 @@ public class IndividualController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Individual> getIndividualById(@PathVariable Long id) {
-        return individualService.getIndividualById(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(()-> ResponseEntity.notFound().build());
+        Individual individual = individualService.getIndividualById(id);
+        return ResponseEntity.ok(individual);
     }
 
     @GetMapping("/event/{eventId}")
@@ -46,14 +44,8 @@ public class IndividualController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Individual> updateIndividual(@PathVariable Long id, @RequestBody Individual individual) {
-        try {
-            Individual updatedIndividual = individualService.updateIndividual(id, individual);
-            return ResponseEntity.ok(updatedIndividual);
-        } catch (NoSuchElementException e) {
-            return ResponseEntity.notFound().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        Individual updatedIndividual = individualService.updateIndividual(id, individual);
+        return ResponseEntity.ok(updatedIndividual);
     }
 
     @DeleteMapping("/{id}")
