@@ -27,6 +27,15 @@ public class CompanyController {
         return company.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     } //todo siia on tarvis, et otsi ettevõtteid ürituse ID järgi, kes on sellele ürr-le end kirja pannud?
 
+    @GetMapping("/event/{eventId}")
+    public ResponseEntity<List<Company>> getCompaniesByEventId(@PathVariable Long eventId) {
+        List<Company> companies = companyService.getCompaniesByEventId(eventId);
+        if (companies.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(companies);
+    }
+
     @PostMapping
     public ResponseEntity<Company> createCompany(@RequestBody Company company) {
         Company savedCompany = companyService.createOrUpdateCompany(company);

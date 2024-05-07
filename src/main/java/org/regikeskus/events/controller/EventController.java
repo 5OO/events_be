@@ -16,7 +16,7 @@ import java.util.NoSuchElementException;
 public class EventController {
 
     private final EventService eventService;
-
+// TODO kas siia lõppunkt lisada, mis arvutab kokku osalejate arvu mida esilehele tuleks kuvada?
     @GetMapping("/future")
     public ResponseEntity<List<Event>> getAllFutureOrCurrentEvents() {
         List<Event> events = eventService.getAllFutureOrCurrentEvents();

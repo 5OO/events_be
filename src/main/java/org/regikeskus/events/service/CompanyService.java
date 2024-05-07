@@ -13,6 +13,8 @@ import java.util.Optional;
 @Service
 public class CompanyService {
 
+    private static final String COMPANY_NOT_FOUND_MESSAGE = "Company not found with participant-ID: ";
+
     private final CompanyRepository companyRepository;
 
     @Transactional(readOnly = true)
@@ -23,6 +25,11 @@ public class CompanyService {
     @Transactional(readOnly = true)
     public Optional<Company> getCompanyById(Long id) {
         return companyRepository.findById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Company> getCompaniesByEventId(Long eventId) {
+        return companyRepository.findByEvent_EventId(eventId);
     }
 
     @Transactional
