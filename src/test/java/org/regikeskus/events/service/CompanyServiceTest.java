@@ -67,11 +67,11 @@ class CompanyServiceTest {
     }
 
     @Test
-    void testCreateOrUpdateCompany_Success() {
+    void testCreateCompany_Success() {
         Company company = new Company(1L, null, "Weltweit Softwareentwicklung AS", "11629770", 22, "Bank Transfer", "No allergies");
         when(companyRepository.save(any(Company.class))).thenReturn(company);
 
-        Company savedCompany = companyService.createOrUpdateCompany(company);
+        Company savedCompany = companyService.createCompany(company);
 
         assertNotNull(savedCompany);
         verify(companyRepository).save(company);
@@ -79,10 +79,10 @@ class CompanyServiceTest {
 
     @Test
     @DisplayName("createOrUpdateIndividual test with missing legalName")
-    void testCreateOrUpdateCompany_Failure() {
+    void testCreateCompany_Failure() {
         Company company = new Company(1L, null, null, "11629770", 22, "Bank Transfer", "No allergies");
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> companyService.createOrUpdateCompany(company));
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> companyService.createCompany(company));
 
         assertEquals("Company must have a registration code and a legal name", exception.getMessage());
 

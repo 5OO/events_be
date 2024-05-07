@@ -38,28 +38,19 @@ public class CompanyController {
 
     @PostMapping
     public ResponseEntity<Company> createCompany(@RequestBody Company company) {
-        Company savedCompany = companyService.createOrUpdateCompany(company);
+        Company savedCompany = companyService.createCompany(company);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedCompany);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Company> updateCompany(@PathVariable Long id, @RequestBody Company company) {
-        return companyService.getCompanyById(id).map(savedCompany -> {
-            savedCompany.setLegalName(company.getLegalName());
-            savedCompany.setRegistrationCode(company.getRegistrationCode());
-            savedCompany.setNumberOfParticipants(company.getNumberOfParticipants());
-            savedCompany.setPaymentMethod(company.getPaymentMethod());
-            savedCompany.setAdditionalInfo(company.getAdditionalInfo());
-            Company updatedCompany = companyService.createOrUpdateCompany(company);
-            return ResponseEntity.ok(updatedCompany);
-        }).orElseGet(() -> ResponseEntity.notFound().build());
+        Company updatedCompany = companyService.updateCompany(id, company);
+        return ResponseEntity.ok(updatedCompany);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteCompany(@PathVariable Long id) {
-        return companyService.getCompanyById(id).map(ignored -> {
-            companyService.deleteCompany(id);
-            return ResponseEntity.ok().build();
-        }).orElseGet(() -> ResponseEntity.notFound().build());
+        companyService.deleteCompany(id);
+        return ResponseEntity.ok().build();
     }
 }
