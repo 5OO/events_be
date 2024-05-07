@@ -29,7 +29,7 @@ public class IndividualController {
                 .orElseGet(()-> ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/event/{eventId}/individuals")
+    @GetMapping("/event/{eventId}")
     public ResponseEntity<List<Individual>> getIndividualsByEventId(@PathVariable Long eventId) {
         List<Individual> individuals = individualService.getIndividualsByEventId(eventId);
         if (individuals.isEmpty()) {
