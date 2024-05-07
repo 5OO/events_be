@@ -10,6 +10,16 @@ import java.util.NoSuchElementException;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(CompanyNotFoundException.class)
+    public ResponseEntity<Object> handleCompanyNotFoundException(CompanyNotFoundException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(CompanyValidationException.class)
+    public ResponseEntity<Object> handleCompanyValidationException(CompanyValidationException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(IndividualValidationException.class)
     public ResponseEntity<Object> handleIndividualValidationException(IndividualValidationException exception) {
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
