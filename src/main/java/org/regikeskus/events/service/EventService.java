@@ -48,12 +48,6 @@ public class EventService {
         return eventRepository.save(event);
     }
 
-    private void validateEvent(Event event) {
-        if (event.getEventName() == null || event.getEventDateTime() == null || event.getLocation() == null) {
-            throw new EventValidationException("Event name or date/time or location must not be null");
-        }
-    }
-
     @Transactional
     public Event updateEvent(Long id, Event eventDetails) {
         Event event = eventRepository.findById(id).orElseThrow(() -> new NoSuchElementException(EVENT_NOT_FOUND_MESSAGE + id));
@@ -62,7 +56,15 @@ public class EventService {
         event.setEventDateTime(eventDetails.getEventDateTime());
         event.setLocation(eventDetails.getLocation());
         event.setAdditionalInfo(eventDetails.getAdditionalInfo());
+
+        validateEvent(event);
         return eventRepository.save(event);
+    }
+
+    private void validateEvent(Event event) {
+        if (event.getEventName() == null || event.getEventDateTime() == null || event.getLocation() == null) {
+            throw new EventValidationException("Event name or date/time or location must not be null");
+        }
     }
 
     @Transactional
