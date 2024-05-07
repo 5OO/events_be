@@ -23,9 +23,9 @@ public class CompanyController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Company> getCompanyById(@PathVariable Long id) {
-        Optional<Company> company = companyService.getCompanyById(id);
-        return company.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    } //todo siia on tarvis, et otsi ettevõtteid ürituse ID järgi, kes on sellele ürr-le end kirja pannud?
+        Company company = companyService.getCompanyById(id);
+        return ResponseEntity.ok(company);
+    }
 
     @GetMapping("/event/{eventId}")
     public ResponseEntity<List<Company>> getCompaniesByEventId(@PathVariable Long eventId) {
