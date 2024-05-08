@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -32,7 +31,7 @@ public class EventService {
     @Transactional(readOnly = true)
     public List<EventWithParticipantsDTO> getAllFutureOrCurrentEvents() {
         List<Event> eventList = eventRepository.findAllFutureOrCurrentEvents(LocalDateTime.now());
-        return eventList.stream().map(this::mapToEventWithParticipantsDTO).collect(Collectors.toList());
+        return eventList.stream().map(this::mapToEventWithParticipantsDTO).toList();
     }
 
     private EventWithParticipantsDTO mapToEventWithParticipantsDTO(Event event) {
@@ -51,12 +50,9 @@ public class EventService {
     @Transactional(readOnly = true)
     public List<EventDTO> getAllPastEvents() {
         return eventRepository.findAllPastEvents(LocalDateTime.now()).stream()
-                .map(this::mapToEventDTO)
-                .collect(Collectors.toList());
+                .map(this::mapToEventDTO).toList();
 
     }
-
-
 
     private EventDTO mapToEventDTO(Event event) {
         return new EventDTO(
