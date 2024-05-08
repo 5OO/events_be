@@ -3,7 +3,6 @@ package org.regikeskus.events.controller;
 import lombok.RequiredArgsConstructor;
 import org.regikeskus.events.dto.EventDTO;
 import org.regikeskus.events.dto.EventWithParticipantsDTO;
-import org.regikeskus.events.model.Event;
 import org.regikeskus.events.service.EventService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,14 +38,14 @@ public class EventController {
     }
 
     @PostMapping
-    public ResponseEntity<Object> createEvent(@RequestBody Event event) {
-            Event createdEvent = eventService.createEvent(event);
+    public ResponseEntity<Object> createEvent(@RequestBody EventDTO eventDTO) {
+            EventDTO createdEvent = eventService.createEvent(eventDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdEvent);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Event> updateEvent(@PathVariable Long id, @RequestBody Event eventDetails) {
-            Event updatedEvent = eventService.updateEvent(id, eventDetails);
+    public ResponseEntity<EventDTO> updateEvent(@PathVariable Long id, @RequestBody EventDTO eventDTO) {
+            EventDTO updatedEvent = eventService.updateEvent(id, eventDTO);
             return ResponseEntity.ok(updatedEvent);
     }
 
