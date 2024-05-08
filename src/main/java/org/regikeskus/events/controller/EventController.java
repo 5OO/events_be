@@ -1,6 +1,7 @@
 package org.regikeskus.events.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.regikeskus.events.dto.EventDTO;
 import org.regikeskus.events.dto.EventWithParticipantsDTO;
 import org.regikeskus.events.model.Event;
 import org.regikeskus.events.service.EventService;
@@ -17,12 +18,6 @@ public class EventController {
 
     private final EventService eventService;
 
-//    @GetMapping("/{eventId}/participants/count")
-//    public ResponseEntity<Integer> getTotalParticipantsForEvent(@PathVariable Long eventId) {
-////            long totalParticipants = eventService.calculateTotalParticipantsForEvent(eventId);
-//            return ResponseEntity.ok(Math.toIntExact(totalParticipants));
-//    }
-
     @GetMapping("/future")
     public ResponseEntity<List<EventWithParticipantsDTO>> getAllFutureOrCurrentEvents() {
         List<EventWithParticipantsDTO> events = eventService.getAllFutureOrCurrentEvents();
@@ -30,14 +25,8 @@ public class EventController {
     }
 
     @GetMapping("/past")
-    public ResponseEntity<List<Event>> getAllPastEvents() {
-        List<Event> events = eventService.getAllPastEvents();
-        return ResponseEntity.ok(events);
-    }
-
-    @GetMapping
-    public ResponseEntity<List<Event>> getAllEvents() {
-        List<Event> events = eventService.getAllEvents();
+    public ResponseEntity<List<EventDTO>> getAllPastEvents() {
+        List<EventDTO> events = eventService.getAllPastEvents();
         return ResponseEntity.ok(events);
     }
 

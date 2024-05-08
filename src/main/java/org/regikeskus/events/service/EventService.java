@@ -1,6 +1,7 @@
 package org.regikeskus.events.service;
 
 import lombok.RequiredArgsConstructor;
+import org.regikeskus.events.dto.EventDTO;
 import org.regikeskus.events.dto.EventWithParticipantsDTO;
 import org.regikeskus.events.exception.EventNotFoundException;
 import org.regikeskus.events.exception.EventValidationException;
@@ -49,13 +50,23 @@ public class EventService {
     }
 
     @Transactional(readOnly = true)
-    public List<Event> getAllPastEvents() {
-        return eventRepository.findAllPastEvents(LocalDateTime.now());
+    public List<EventDTO> getAllPastEvents() {
+        return eventRepository.findAllPastEvents(LocalDateTime.now()).stream()
+                .map(this::mapToEventDTO)
+                .collect(Collectors.toList());
+
     }
 
-    @Transactional(readOnly = true)
-    public List<Event> getAllEvents() {
-        return eventRepository.findAll();
+
+
+    private EventDTO mapToEventDTO(Event event) {
+        return new EventDTO(
+                event.getEventId(),
+                event.getEventName(),
+                event.getEventDateTime(),
+                event.getLocation(),
+                event.getAdditionalInfo()
+        );
     }
 
     @Transactional(readOnly = true)
