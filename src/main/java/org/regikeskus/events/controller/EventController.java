@@ -1,6 +1,7 @@
 package org.regikeskus.events.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.regikeskus.events.dto.EventWithParticipantsDTO;
 import org.regikeskus.events.model.Event;
 import org.regikeskus.events.service.EventService;
 import org.springframework.http.HttpStatus;
@@ -16,15 +17,15 @@ public class EventController {
 
     private final EventService eventService;
 
-    @GetMapping("/{eventId}/participants/count")
-    public ResponseEntity<Integer> getTotalParticipantsForEvent(@PathVariable Long eventId) {
-            long totalParticipants = eventService.calculateTotalParticipantsForEvent(eventId);
-            return ResponseEntity.ok(Math.toIntExact(totalParticipants));
-    }
+//    @GetMapping("/{eventId}/participants/count")
+//    public ResponseEntity<Integer> getTotalParticipantsForEvent(@PathVariable Long eventId) {
+////            long totalParticipants = eventService.calculateTotalParticipantsForEvent(eventId);
+//            return ResponseEntity.ok(Math.toIntExact(totalParticipants));
+//    }
 
     @GetMapping("/future")
-    public ResponseEntity<List<Event>> getAllFutureOrCurrentEvents() {
-        List<Event> events = eventService.getAllFutureOrCurrentEvents();
+    public ResponseEntity<List<EventWithParticipantsDTO>> getAllFutureOrCurrentEvents() {
+        List<EventWithParticipantsDTO> events = eventService.getAllFutureOrCurrentEvents();
         return ResponseEntity.ok(events);
     }
 

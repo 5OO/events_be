@@ -28,7 +28,7 @@ public class PaymentMethodService {
         JsonNode node = mapper.readTree(input);
         paymentMethods = StreamSupport.stream(node.get("paymentMethods").spliterator(), false)
                 .map(JsonNode::asText)
-                .toList();  // Using Java 16 Stream.toList()
+                .toList();
     }
 
 }

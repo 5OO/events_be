@@ -1,6 +1,7 @@
 package org.regikeskus.events.service;
 
 import lombok.RequiredArgsConstructor;
+import org.regikeskus.events.dto.EventWithParticipantsDTO;
 import org.regikeskus.events.exception.EventNotFoundException;
 import org.regikeskus.events.exception.EventValidationException;
 import org.regikeskus.events.model.Company;
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -28,16 +30,22 @@ public class EventService {
     private final CompanyRepository companyRepository;
 
     @Transactional(readOnly = true)
-    public long calculateTotalParticipantsForEvent(Long eventId) {
-        long individualCount = individualRepository.countByEventId(eventId);
-        Long companyParticipantsSum = companyRepository.sumNumberOfParticipantsByEventId(eventId);
-        long totalCompanyParticipants = companyParticipantsSum != null ? companyParticipantsSum : 0;
-        return individualCount + totalCompanyParticipants;
+    public List<EventWithParticipantsDTO> getAllFutureOrCurrentEvents() {
+        List<Event> eventList = eventRepository.findAllFutureOrCurrentEvents(LocalDateTime.now());
+        return eventList.stream().map(this::mapToEventWithParticipantsDTO).collect(Collectors.toList());
     }
 
-    @Transactional(readOnly = true)
-    public List<Event> getAllFutureOrCurrentEvents() {
-        return eventRepository.findAllFutureOrCurrentEvents(LocalDateTime.now());
+    private EventWithParticipantsDTO mapToEventWithParticipantsDTO(Event event) {
+        long individualCount = individualRepository.countByEventId(event.getEventId());
+        Long companyParticipantsSum = companyRepository.sumNumberOfParticipantsByEventId(event.getEventId());
+        long totalCompanyParticipants = companyParticipantsSum != null ? companyParticipantsSum : 0;
+        int totalParticipants = (int) (individualCount + totalCompanyParticipants);
+        return new EventWithParticipantsDTO(
+                event.getEventId(),
+                event.getEventName(),
+                event.getEventDateTime().toLocalDate(),
+                totalParticipants
+        );
     }
 
     @Transactional(readOnly = true)
