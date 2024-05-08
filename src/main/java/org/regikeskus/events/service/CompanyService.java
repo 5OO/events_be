@@ -49,16 +49,14 @@ public class CompanyService {
     public Company updateCompany(Long participantId, Company updatedCompany) {
         Company company = companyRepository.findById(participantId).orElseThrow(() -> new CompanyNotFoundException(COMPANY_NOT_FOUND_MESSAGE + participantId));
 
-        if (!eventRepository.existsById(updatedCompany.getEventId())) {
-            throw new EventNotFoundException("Event not found with ID: " + updatedCompany.getEventId());
-        }
+        validateCompany(updatedCompany);
+
         company.setLegalName(updatedCompany.getLegalName());
         company.setRegistrationCode(updatedCompany.getRegistrationCode());
         company.setNumberOfParticipants(updatedCompany.getNumberOfParticipants());
         company.setPaymentMethod(updatedCompany.getPaymentMethod());
         company.setAdditionalInfo(updatedCompany.getAdditionalInfo());
 
-        validateCompany(company);
         log.debug("Updating company {} with event ID {}", participantId, updatedCompany.getEventId());
         return companyRepository.save(company);
     }
@@ -68,6 +66,9 @@ public class CompanyService {
             throw new CompanyValidationException("Company must have a registration code and a legal name");
         }
         if (eventRepository.existsById(company.getEventId())) {
+            throw new EventNotFoundException("Event not found with ID: " + company.getEventId());
+        }
+        if (!eventRepository.existsById(company.getEventId())) {
             throw new EventNotFoundException("Event not found with ID: " + company.getEventId());
         }
     }

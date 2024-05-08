@@ -46,9 +46,6 @@ public class IndividualService {
     @Transactional
     public Individual createIndividual(Individual individual) {
         validateIndividual(individual);
-        if (!eventRepository.existsById(individual.getEventId())) {
-            throw new IndividualNotFoundException("Event not found with ID: " + individual.getEventId());
-        }
         log.debug("Creating individual with event ID {}", individual.getEventId());
         return individualRepository.save(individual);
     }
@@ -58,9 +55,7 @@ public class IndividualService {
         Individual individual = individualRepository.findById(participantID)
                 .orElseThrow(() -> new IndividualNotFoundException(INDIVIDUAL_NOT_FOUND_MESSAGE + participantID));
 
-        if (!eventRepository.existsById(updatedIndividual.getEventId())) {
-            throw new EventNotFoundException("Event not found with ID: " + updatedIndividual.getEventId());
-        }
+        validateIndividual(updatedIndividual);
 
         individual.setFirstName(updatedIndividual.getFirstName());
         individual.setLastName(updatedIndividual.getLastName());
@@ -68,7 +63,6 @@ public class IndividualService {
         individual.setPaymentMethod(updatedIndividual.getPaymentMethod());
         individual.setAdditionalInfo(updatedIndividual.getAdditionalInfo());
 
-        validateIndividual(individual);
         log.debug("Updating individual {} with event ID {}", participantID, individual.getEventId());
         return individualRepository.save(individual);
     }
@@ -79,6 +73,9 @@ public class IndividualService {
         }
         if (!IdValidationUtils.isValidEstonianPersonalId(individual.getPersonalID())) {
             throw new IndividualValidationException("Invalid Estonian Personal ID. " + individual.getPersonalID());
+        }
+        if (!eventRepository.existsById(individual.getEventId())) {
+            throw new EventNotFoundException("Event not found with ID: " + individual.getEventId());
         }
     }
 
