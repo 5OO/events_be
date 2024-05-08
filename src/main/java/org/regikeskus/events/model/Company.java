@@ -24,6 +24,7 @@ public class Company {
     @Column(nullable = false)
     private String registrationCode;
 
+    @Column(nullable = false)
     private Integer numberOfParticipants;
     private String paymentMethod;
     private String additionalInfo;

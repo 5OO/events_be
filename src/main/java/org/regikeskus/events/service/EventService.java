@@ -28,6 +28,14 @@ public class EventService {
     private final CompanyRepository companyRepository;
 
     @Transactional(readOnly = true)
+    public long calculateTotalParticipantsForEvent(Long eventId) {
+        long individualCount = individualRepository.countByEventId(eventId);
+        Long companyParticipantsSum = companyRepository.sumNumberOfParticipantsByEventId(eventId);
+        long totalCompanyParticipants = companyParticipantsSum != null ? companyParticipantsSum : 0;
+        return individualCount + totalCompanyParticipants;
+    }
+
+    @Transactional(readOnly = true)
     public List<Event> getAllFutureOrCurrentEvents() {
         return eventRepository.findAllFutureOrCurrentEvents(LocalDateTime.now());
     }

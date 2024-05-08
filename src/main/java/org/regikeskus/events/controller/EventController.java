@@ -15,7 +15,13 @@ import java.util.List;
 public class EventController {
 
     private final EventService eventService;
-// TODO kas siia lõppunkt lisada, mis arvutab kokku osalejate arvu mida esilehele tuleks kuvada?
+
+    @GetMapping("/{eventId}/participants/count")
+    public ResponseEntity<Integer> getTotalParticipantsForEvent(@PathVariable Long eventId) {
+            long totalParticipants = eventService.calculateTotalParticipantsForEvent(eventId);
+            return ResponseEntity.ok(Math.toIntExact(totalParticipants));
+    }
+
     @GetMapping("/future")
     public ResponseEntity<List<Event>> getAllFutureOrCurrentEvents() {
         List<Event> events = eventService.getAllFutureOrCurrentEvents();
