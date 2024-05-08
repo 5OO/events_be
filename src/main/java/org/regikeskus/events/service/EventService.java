@@ -70,9 +70,9 @@ public class EventService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<Event> getEventById(Long id) {
-        return Optional.ofNullable(eventRepository.findById(id)
-                .orElseThrow(() -> new EventNotFoundException(EVENT_NOT_FOUND_MESSAGE + id)));
+    public Optional<EventDTO> getEventById(Long id) {
+        return eventRepository.findById(id)
+                .map(this::mapToEventDTO);
     }
 
     @Transactional
