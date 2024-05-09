@@ -1,14 +1,13 @@
 package org.regikeskus.events.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.regikeskus.events.model.Company;
+import org.regikeskus.events.dto.CompanyDTO;
 import org.regikeskus.events.service.CompanyService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @RestController
@@ -16,20 +15,15 @@ import java.util.Optional;
 public class CompanyController {
     private final CompanyService companyService;
 
-    @GetMapping
-    public List<Company> getAllCompanies() {
-        return companyService.getAllCompanies();
-    } // TODO verify if it is really needed. might be obsolete.
-
     @GetMapping("/{id}")
-    public ResponseEntity<Company> getCompanyById(@PathVariable Long id) {
-        Company company = companyService.getCompanyById(id);
+    public ResponseEntity<CompanyDTO> getCompanyById(@PathVariable Long id) {
+        CompanyDTO company = companyService.getCompanyById(id);
         return ResponseEntity.ok(company);
     }
 
     @GetMapping("/event/{eventId}")
-    public ResponseEntity<List<Company>> getCompaniesByEventId(@PathVariable Long eventId) {
-        List<Company> companies = companyService.getCompaniesByEventId(eventId);
+    public ResponseEntity<List<CompanyDTO>> getCompaniesByEventId(@PathVariable Long eventId) {
+        List<CompanyDTO> companies = companyService.getCompaniesByEventId(eventId);
         if (companies.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
@@ -37,14 +31,14 @@ public class CompanyController {
     }
 
     @PostMapping
-    public ResponseEntity<Company> createCompany(@RequestBody Company company) {
-        Company savedCompany = companyService.createCompany(company);
+    public ResponseEntity<CompanyDTO> createCompany(@RequestBody CompanyDTO companyDTO) {
+        CompanyDTO savedCompany = companyService.createCompany(companyDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedCompany);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Company> updateCompany(@PathVariable Long id, @RequestBody Company company) {
-        Company updatedCompany = companyService.updateCompany(id, company);
+    public ResponseEntity<CompanyDTO> updateCompany(@PathVariable Long id, @RequestBody CompanyDTO companyDTO) {
+        CompanyDTO updatedCompany = companyService.updateCompany(id, companyDTO);
         return ResponseEntity.ok(updatedCompany);
     }
 

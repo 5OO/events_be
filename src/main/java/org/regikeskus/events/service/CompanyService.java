@@ -2,6 +2,7 @@ package org.regikeskus.events.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.regikeskus.events.dto.CompanyDTO;
 import org.regikeskus.events.exception.CompanyNotFoundException;
 import org.regikeskus.events.exception.CompanyValidationException;
 import org.regikeskus.events.exception.EventNotFoundException;
@@ -24,52 +25,53 @@ public class CompanyService {
     private final EventRepository eventRepository;
 
     @Transactional(readOnly = true)
-    public List<Company> getAllCompanies() {
-        return companyRepository.findAll();
+    public CompanyDTO getCompanyById(Long id) {
+        return companyRepository.findById(id)
+                .map(this::mapToCompanyDTO)
+                .orElseThrow(()-> new CompanyNotFoundException(COMPANY_NOT_FOUND_MESSAGE + id));
     }
 
     @Transactional(readOnly = true)
-    public Company getCompanyById(Long id) {
-        return companyRepository.findById(id).orElseThrow(()-> new CompanyNotFoundException(COMPANY_NOT_FOUND_MESSAGE + id));
-    }
-
-    @Transactional(readOnly = true)
-    public List<Company> getCompaniesByEventId(Long eventId) {
-        return companyRepository.findByEventId(eventId);
+    public List<CompanyDTO> getCompaniesByEventId(Long eventId) {
+        return companyRepository.findByEventId(eventId).stream()
+                .map(this::mapToCompanyDTO).toList();
     }
 
     @Transactional
-    public Company createCompany(Company company) {
-        validateCompany(company);
+    public CompanyDTO createCompany(CompanyDTO companyDTO) {
+        validateCompanyDTO(companyDTO);
+        Company company = mapToCompany(companyDTO);
         log.debug("Creating company with event ID {}", company.getEventId());
-        return companyRepository.save(company);
+        Company savedCompany = companyRepository.save(company);
+        return mapToCompanyDTO(savedCompany);
     }
 
     @Transactional
-    public Company updateCompany(Long participantId, Company updatedCompany) {
+    public CompanyDTO updateCompany(Long participantId, CompanyDTO updatedCompanyDTO) {
         Company company = companyRepository.findById(participantId).orElseThrow(() -> new CompanyNotFoundException(COMPANY_NOT_FOUND_MESSAGE + participantId));
 
-        validateCompany(updatedCompany);
+        validateCompanyDTO(updatedCompanyDTO);
 
-        company.setLegalName(updatedCompany.getLegalName());
-        company.setRegistrationCode(updatedCompany.getRegistrationCode());
-        company.setNumberOfParticipants(updatedCompany.getNumberOfParticipants());
-        company.setPaymentMethod(updatedCompany.getPaymentMethod());
-        company.setAdditionalInfo(updatedCompany.getAdditionalInfo());
+        company.setLegalName(updatedCompanyDTO.getLegalName());
+        company.setRegistrationCode(updatedCompanyDTO.getRegistrationCode());
+        company.setNumberOfParticipants(updatedCompanyDTO.getNumberOfParticipants());
+        company.setPaymentMethod(updatedCompanyDTO.getPaymentMethod());
+        company.setAdditionalInfo(updatedCompanyDTO.getAdditionalInfo());
 
-        log.debug("Updating company {} with event ID {}", participantId, updatedCompany.getEventId());
-        return companyRepository.save(company);
+        log.debug("Updating company {} with event ID {}", participantId, updatedCompanyDTO.getEventId());
+        Company savedCompany = companyRepository.save(company);
+        return mapToCompanyDTO(companyRepository.save(savedCompany));
     }
 
-    private void validateCompany(Company company) {
-        if (company.getLegalName() == null || company.getRegistrationCode() == null) {
+    private void validateCompanyDTO(CompanyDTO companyDTO) {
+        if (companyDTO.getLegalName() == null || companyDTO.getRegistrationCode() == null) {
             throw new CompanyValidationException("Company must have a registration code and a legal name");
         }
-        if (eventRepository.existsById(company.getEventId())) {
-            throw new EventNotFoundException("Event not found with ID: " + company.getEventId());
+        if (eventRepository.existsById(companyDTO.getEventId())) {
+            throw new EventNotFoundException("Event not found with ID: " + companyDTO.getEventId());
         }
-        if (!eventRepository.existsById(company.getEventId())) {
-            throw new EventNotFoundException("Event not found with ID: " + company.getEventId());
+        if (!eventRepository.existsById(companyDTO.getEventId())) {
+            throw new EventNotFoundException("Event not found with ID: " + companyDTO.getEventId());
         }
     }
 
@@ -79,5 +81,29 @@ public class CompanyService {
             throw new CompanyNotFoundException(COMPANY_NOT_FOUND_MESSAGE + id);
         }
         companyRepository.deleteById(id);
+    }
+
+    private CompanyDTO mapToCompanyDTO(Company company) {
+        return new CompanyDTO(
+                company.getParticipantId(),
+                company.getEventId(),
+                company.getLegalName(),
+                company.getRegistrationCode(),
+                company.getNumberOfParticipants(),
+                company.getPaymentMethod(),
+                company.getAdditionalInfo()
+        );
+    }
+
+    private Company mapToCompany(CompanyDTO companyDTO) {
+        return new Company(
+                companyDTO.getParticipantId(),
+                companyDTO.getEventId(),
+                companyDTO.getLegalName(),
+                companyDTO.getRegistrationCode(),
+                companyDTO.getNumberOfParticipants(),
+                companyDTO.getPaymentMethod(),
+                companyDTO.getAdditionalInfo()
+        );
     }
 }
