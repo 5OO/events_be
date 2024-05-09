@@ -2,6 +2,7 @@ package org.regikeskus.events.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.regikeskus.events.dto.EventDTO;
+import org.regikeskus.events.dto.EventWithAggregatedParticipantsDTO;
 import org.regikeskus.events.dto.EventWithParticipantsDTO;
 import org.regikeskus.events.service.EventService;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,12 @@ import java.util.Optional;
 public class EventController {
 
     private final EventService eventService;
+
+    @GetMapping("/{id}/aggregated-participants")
+    public ResponseEntity<EventWithAggregatedParticipantsDTO> getEventWithAggregatedParticipants(@PathVariable Long id) {
+        EventWithAggregatedParticipantsDTO event = eventService.getEventWithAggregatedParticipants(id);
+        return ResponseEntity.ok(event);
+    }
 
     @GetMapping("/future")
     public ResponseEntity<List<EventWithParticipantsDTO>> getAllFutureOrCurrentEvents() {

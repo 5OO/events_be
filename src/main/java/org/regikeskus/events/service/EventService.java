@@ -1,8 +1,11 @@
 package org.regikeskus.events.service;
 
 import lombok.RequiredArgsConstructor;
+import org.regikeskus.events.dto.AggregatedParticipantDTO;
 import org.regikeskus.events.dto.EventDTO;
+import org.regikeskus.events.dto.EventWithAggregatedParticipantsDTO;
 import org.regikeskus.events.dto.EventWithParticipantsDTO;
+import org.regikeskus.events.exception.EventNotFoundException;
 import org.regikeskus.events.exception.EventValidationException;
 import org.regikeskus.events.model.Company;
 import org.regikeskus.events.model.Event;
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -27,6 +31,40 @@ public class EventService {
     private final EventRepository eventRepository;
     private final IndividualRepository individualRepository;
     private final CompanyRepository companyRepository;
+
+    public EventWithAggregatedParticipantsDTO getEventWithAggregatedParticipants(Long eventId) {
+        var event = eventRepository.findById(eventId).orElseThrow(() -> new EventNotFoundException("Event not found with ID: " + eventId));
+
+        List<AggregatedParticipantDTO> participants = new ArrayList<>();
+
+        individualRepository.findByEventId(eventId).forEach(individual -> {
+            AggregatedParticipantDTO participantDTO = new AggregatedParticipantDTO(
+                    individual.getParticipantId(),
+                    "individual",
+                    individual.getFirstName() + " " + individual.getLastName(),
+                    individual.getPersonalID()
+            );
+            participants.add(participantDTO);
+        });
+
+        companyRepository.findByEventId(eventId).forEach(company -> {
+            AggregatedParticipantDTO participantDTO = new AggregatedParticipantDTO(
+                    company.getParticipantId(),
+                    "company",
+                    company.getLegalName(),
+                    company.getRegistrationCode()
+            );
+            participants.add(participantDTO);
+        });
+
+        return new EventWithAggregatedParticipantsDTO(
+                event.getEventId(),
+                event.getEventName(),
+                event.getEventDateTime().toLocalDate(),
+                event.getLocation(),
+                participants
+        );
+    }
 
     @Transactional(readOnly = true)
     public List<EventWithParticipantsDTO> getAllFutureOrCurrentEvents() {
@@ -54,16 +92,6 @@ public class EventService {
 
     }
 
-    private EventDTO mapToEventDTO(Event event) {
-        return new EventDTO(
-                event.getEventId(),
-                event.getEventName(),
-                event.getEventDateTime(),
-                event.getLocation(),
-                event.getAdditionalInfo()
-        );
-    }
-
     @Transactional(readOnly = true)
     public Optional<EventDTO> getEventById(Long id) {
         return eventRepository.findById(id)
@@ -76,16 +104,6 @@ public class EventService {
         Event event = mapToEventEntity(eventDTO);
          Event savedEvent = eventRepository.save(event);
         return mapToEventDTO(savedEvent);
-    }
-
-    private Event mapToEventEntity(EventDTO eventDTO) {
-        return new Event(
-                eventDTO.getEventId(),
-                eventDTO.getEventName(),
-                eventDTO.getEventDateTime(),
-                eventDTO.getLocation(),
-                eventDTO.getAdditionalInfo()
-        );
     }
 
     @Transactional
@@ -119,5 +137,25 @@ public class EventService {
         individualRepository.deleteAll(individuals);
         companyRepository.deleteAll(companies);
         eventRepository.deleteById(id);
+    }
+
+    private EventDTO mapToEventDTO(Event event) {
+        return new EventDTO(
+                event.getEventId(),
+                event.getEventName(),
+                event.getEventDateTime(),
+                event.getLocation(),
+                event.getAdditionalInfo()
+        );
+    }
+
+    private Event mapToEventEntity(EventDTO eventDTO) {
+        return new Event(
+                eventDTO.getEventId(),
+                eventDTO.getEventName(),
+                eventDTO.getEventDateTime(),
+                eventDTO.getLocation(),
+                eventDTO.getAdditionalInfo()
+        );
     }
 }
