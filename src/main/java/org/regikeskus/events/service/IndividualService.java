@@ -25,6 +25,13 @@ public class IndividualService {
     private final EventRepository eventRepository;
     private final IndividualRepository individualRepository;
 
+
+    @Transactional(readOnly = true)
+    public IndividualDTO getIndividualByIdAndEventId(Long participantId, Long eventId) {
+        return individualRepository.findByParticipantIdAndEventId(participantId, eventId)
+                .map(this::mapToIndividualDTO)
+                .orElseThrow(() -> new IndividualNotFoundException(INDIVIDUAL_NOT_FOUND_MESSAGE + participantId));
+    }
     @Transactional(readOnly = true)
     public IndividualDTO getIndividualById(Long id) {
         log.debug("Retrieving Individuals By participantId {}", id);

@@ -16,6 +16,11 @@ public class IndividualController {
 
     private final IndividualService individualService;
 
+    @GetMapping("/{participantId}/event/{eventId}")
+    public ResponseEntity<IndividualDTO> getIndividualByIdAndEventId(@PathVariable Long participantId, @PathVariable Long eventId) {
+        return ResponseEntity.ok(individualService.getIndividualByIdAndEventId(participantId, eventId));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<IndividualDTO> getIndividualById(@PathVariable Long id) {
         IndividualDTO individualDTO = individualService.getIndividualById(id);
