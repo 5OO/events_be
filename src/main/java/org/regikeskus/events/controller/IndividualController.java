@@ -2,7 +2,6 @@ package org.regikeskus.events.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.regikeskus.events.dto.IndividualDTO;
-import org.regikeskus.events.model.Individual;
 import org.regikeskus.events.service.IndividualService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
