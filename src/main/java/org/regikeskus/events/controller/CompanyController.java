@@ -15,6 +15,11 @@ import java.util.List;
 public class CompanyController {
     private final CompanyService companyService;
 
+    @GetMapping("/{participantId}/event/{eventId}")
+    public ResponseEntity<CompanyDTO> getCompanyByIdAndEventId(@PathVariable Long participantId, @PathVariable Long eventId) {
+        return ResponseEntity.ok(companyService.getCompanyByIdAndEventId(participantId, eventId));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<CompanyDTO> getCompanyById(@PathVariable Long id) {
         CompanyDTO company = companyService.getCompanyById(id);

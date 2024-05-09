@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface CompanyRepository extends JpaRepository<Company, Long> {
 
@@ -12,4 +13,6 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
 
     @Query("SELECT SUM(c.numberOfParticipants) FROM Company c WHERE c.eventId = :eventId")
     Long sumNumberOfParticipantsByEventId(Long eventId);
+
+    Optional<Company> findByParticipantIdAndEventId(Long participantId, Long eventId);
 }

@@ -25,6 +25,13 @@ public class CompanyService {
     private final EventRepository eventRepository;
 
     @Transactional(readOnly = true)
+    public CompanyDTO getCompanyByIdAndEventId(Long participantId, Long eventId) {
+        return companyRepository.findByParticipantIdAndEventId(participantId, eventId)
+                .map(this::mapToCompanyDTO)
+                .orElseThrow(() -> new CompanyNotFoundException(COMPANY_NOT_FOUND_MESSAGE + participantId));
+    }
+
+    @Transactional(readOnly = true)
     public CompanyDTO getCompanyById(Long id) {
         return companyRepository.findById(id)
                 .map(this::mapToCompanyDTO)
