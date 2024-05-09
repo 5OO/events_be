@@ -34,7 +34,8 @@ class IndividualServiceTest {
 
     @Mock
     private EventRepository eventRepository;
-
+    private Individual individual;
+    private IndividualDTO individualDTO;
     private List<Individual> individuals;
 
     @BeforeEach
@@ -42,6 +43,40 @@ class IndividualServiceTest {
         individuals = new ArrayList<>();
         individuals.add(new Individual(1L, 10L, "Kalju", "Saar", "51107121760", "Bank Transfer", "No allergies"));
         individuals.add(new Individual(2L, 10L, "Kati", "Saar", "60010123456", "Cash", "Vegetarian"));
+
+        individual = new Individual(1L, 10L, "Kalju", "Saar", "51107121760", "Bank Transfer", "No allergies");
+        individualDTO = new IndividualDTO(1L, 10L, "Kalju", "Saar", "51107121760", "Bank Transfer", "No allergies");
+    }
+
+
+    @Test
+    void testGetIndividualByIdAndEventId_Exists() {
+        Long participantId = 1L;
+        Long eventId = 10L;
+
+        when(individualRepository.findByParticipantIdAndEventId(participantId, eventId)).thenReturn(Optional.of(individual));
+
+        IndividualDTO foundIndividual = individualService.getIndividualByIdAndEventId(participantId, eventId);
+
+        assertNotNull(foundIndividual);
+        assertEquals("Kalju", foundIndividual.getFirstName());
+        assertEquals("Saar", foundIndividual.getLastName());
+        assertEquals("51107121760", foundIndividual.getPersonalID());
+        assertEquals("Bank Transfer", foundIndividual.getPaymentMethod());
+        verify(individualRepository).findByParticipantIdAndEventId(participantId, eventId);
+    }
+
+    @Test
+    void testGetIndividualByIdAndEventId_NotFound() {
+        Long participantId = 1L;
+        Long eventId = 10L;
+
+        when(individualRepository.findByParticipantIdAndEventId(participantId, eventId)).thenReturn(Optional.empty());
+
+        IndividualNotFoundException exception = assertThrows(IndividualNotFoundException.class, () -> individualService.getIndividualByIdAndEventId(participantId, eventId));
+
+        assertEquals("Individual not found with participant-ID: " + participantId, exception.getMessage());
+        verify(individualRepository).findByParticipantIdAndEventId(participantId, eventId);
     }
 
     @Test
