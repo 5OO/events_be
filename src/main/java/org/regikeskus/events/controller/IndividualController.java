@@ -1,6 +1,7 @@
 package org.regikeskus.events.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.regikeskus.events.dto.IndividualDTO;
 import org.regikeskus.events.model.Individual;
 import org.regikeskus.events.service.IndividualService;
 import org.springframework.http.HttpStatus;
@@ -16,35 +17,30 @@ public class IndividualController {
 
     private final IndividualService individualService;
 
-    @GetMapping
-    public List<Individual> getAllIndividuals() {
-        return individualService.getAllIndividuals();
-    } // TODO verify if it is really needed. might be obsolete.
-
     @GetMapping("/{id}")
-    public ResponseEntity<Individual> getIndividualById(@PathVariable Long id) {
-        Individual individual = individualService.getIndividualById(id);
-        return ResponseEntity.ok(individual);
+    public ResponseEntity<IndividualDTO> getIndividualById(@PathVariable Long id) {
+        IndividualDTO individualDTO = individualService.getIndividualById(id);
+        return ResponseEntity.ok(individualDTO);
     }
 
     @GetMapping("/event/{eventId}")
-    public ResponseEntity<List<Individual>> getIndividualsByEventId(@PathVariable Long eventId) {
-        List<Individual> individuals = individualService.getIndividualsByEventId(eventId);
-        if (individuals.isEmpty()) {
+    public ResponseEntity<List<IndividualDTO>> getIndividualsByEventId(@PathVariable Long eventId) {
+        List<IndividualDTO> individualDTOList = individualService.getIndividualsByEventId(eventId);
+        if (individualDTOList.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(individuals);
+        return ResponseEntity.ok(individualDTOList);
     }
 
     @PostMapping
-    public ResponseEntity<Individual> createIndividual(@RequestBody Individual individual) {
-        Individual savedIndividual = individualService.createIndividual(individual);
+    public ResponseEntity<IndividualDTO> createIndividual(@RequestBody IndividualDTO individualDTO) {
+        IndividualDTO savedIndividual = individualService.createIndividual(individualDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedIndividual);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Individual> updateIndividual(@PathVariable Long id, @RequestBody Individual individual) {
-        Individual updatedIndividual = individualService.updateIndividual(id, individual);
+    public ResponseEntity<IndividualDTO> updateIndividual(@PathVariable Long id, @RequestBody IndividualDTO individualDTO) {
+        IndividualDTO updatedIndividual = individualService.updateIndividual(id, individualDTO);
         return ResponseEntity.ok(updatedIndividual);
     }
 
