@@ -60,15 +60,12 @@ public class CompanyService {
 
         log.debug("Updating company {} with event ID {}", participantId, updatedCompanyDTO.getEventId());
         Company savedCompany = companyRepository.save(company);
-        return mapToCompanyDTO(companyRepository.save(savedCompany));
+        return mapToCompanyDTO(savedCompany);
     }
 
     private void validateCompanyDTO(CompanyDTO companyDTO) {
         if (companyDTO.getLegalName() == null || companyDTO.getRegistrationCode() == null) {
             throw new CompanyValidationException("Company must have a registration code and a legal name");
-        }
-        if (eventRepository.existsById(companyDTO.getEventId())) {
-            throw new EventNotFoundException("Event not found with ID: " + companyDTO.getEventId());
         }
         if (!eventRepository.existsById(companyDTO.getEventId())) {
             throw new EventNotFoundException("Event not found with ID: " + companyDTO.getEventId());

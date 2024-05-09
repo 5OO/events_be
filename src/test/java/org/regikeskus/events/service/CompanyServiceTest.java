@@ -1,14 +1,18 @@
 package org.regikeskus.events.service;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.regikeskus.events.dto.CompanyDTO;
+import org.regikeskus.events.exception.CompanyNotFoundException;
+import org.regikeskus.events.exception.CompanyValidationException;
 import org.regikeskus.events.model.Company;
 import org.regikeskus.events.repository.CompanyRepository;
+import org.regikeskus.events.repository.EventRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,8 +20,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class CompanyServiceTest {
@@ -28,31 +31,40 @@ class CompanyServiceTest {
     @Mock
     private CompanyRepository companyRepository;
 
-    @Test
-    void testGetAllCompanies() {
-        List<Company> companies = new ArrayList<>();
-        companies.add(new Company(1L, null, "Weltweit Softwareentwicklung AS", "11629770", 22, "Bank Transfer", "No allergies"));
-        companies.add(new Company(2L, null, "WeltWeitWeb AS", "16228231", 33, "Cash", "Vegetarian"));
-        when(companyRepository.findAll()).thenReturn(companies);
+    @Mock
+    private EventRepository eventRepository;
 
-        List<Company> retrievedCompanies = companyService.getAllCompanies();
+    private List<Company> companies;
+
+    @BeforeEach
+    void setUp() {
+        companies = new ArrayList<>();
+        companies.add(new Company(1L, 10L, "Weltweit Softwareentwicklung AS", "11629770", 22, "Bank Transfer", "No allergies"));
+        companies.add(new Company(2L, 10L, "WeltWeitWeb AS", "16228231", 33, "Cash", "Vegetarian"));
+    }
+
+    @Test
+    void testGetCompaniesByEventId() {
+        Long eventId = 10L;
+        when(companyRepository.findByEventId(eventId)).thenReturn(companies);
+
+        List<CompanyDTO> retrievedCompanies = companyService.getCompaniesByEventId(eventId);
 
         assertNotNull(retrievedCompanies);
         assertEquals(2, retrievedCompanies.size());
-        assertEquals(companies, retrievedCompanies);
-        verify(companyRepository).findAll();
+        verify(companyRepository).findByEventId(eventId);
     }
 
     @Test
     void testGetCompanyById_Exists() {
-        Optional<Company> company = Optional.of(new Company(1L, null, "Weltweit Softwareentwicklung AS", "11629770", 22, "Bank Transfer", "No allergies"));
-        when(companyRepository.findById(1L)).thenReturn(company);
+        Company company = new Company(1L, 10L, "Weltweit Softwareentwicklung AS", "11629770", 22, "Bank Transfer", "No allergies");
+        when(companyRepository.findById(1L)).thenReturn(Optional.of(company));
 
-        Optional<Company> foundCompany = companyService.getCompanyById(1L);
+        CompanyDTO foundCompany = companyService.getCompanyById(1L);
 
-        assertTrue(foundCompany.isPresent());
-        assertEquals("Weltweit Softwareentwicklung AS", foundCompany.get().getLegalName());
-        assertEquals("11629770", foundCompany.get().getRegistrationCode());
+        assertNotNull(foundCompany);
+        assertEquals("Weltweit Softwareentwicklung AS", foundCompany.getLegalName());
+        assertEquals("11629770", foundCompany.getRegistrationCode());
         verify(companyRepository).findById(1L);
     }
 
@@ -60,41 +72,72 @@ class CompanyServiceTest {
     void testGetCompanyById_NotFound() {
         when(companyRepository.findById(1L)).thenReturn(Optional.empty());
 
-        Optional<Company> foundCompany = companyService.getCompanyById(1L);
+        CompanyNotFoundException exception = assertThrows(CompanyNotFoundException.class, () -> companyService.getCompanyById(1L));
 
-        assertFalse(foundCompany.isPresent());
+        assertEquals("Company not found with participant-ID: 1", exception.getMessage());
         verify(companyRepository).findById(1L);
     }
 
     @Test
     void testCreateCompany_Success() {
-        Company company = new Company(1L, null, "Weltweit Softwareentwicklung AS", "11629770", 22, "Bank Transfer", "No allergies");
-        when(companyRepository.save(any(Company.class))).thenReturn(company);
+        CompanyDTO companyDTO = new CompanyDTO(1L, 10L, "Weltweit Softwareentwicklung AS", "11629770", 22, "Bank Transfer", "No allergies");
+        Company company = new Company(1L, 10L, "Weltweit Softwareentwicklung AS", "11629770", 22, "Bank Transfer", "No allergies");
 
-        Company savedCompany = companyService.createCompany(company);
+        when(companyRepository.save(any(Company.class))).thenReturn(company);
+        when(eventRepository.existsById(10L)).thenReturn(true);
+
+        CompanyDTO savedCompany = companyService.createCompany(companyDTO);
 
         assertNotNull(savedCompany);
+        assertEquals(companyDTO.getLegalName(), savedCompany.getLegalName());
         verify(companyRepository).save(company);
     }
 
     @Test
-    @DisplayName("createOrUpdateIndividual test with missing legalName")
+    @DisplayName("Create Company test fails with missing legal name")
     void testCreateCompany_Failure() {
-        Company company = new Company(1L, null, null, "11629770", 22, "Bank Transfer", "No allergies");
+        CompanyDTO companyDTO = new CompanyDTO(1L, 10L, null, "11629770", 22, "Bank Transfer", "No allergies");
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> companyService.createCompany(company));
+        CompanyValidationException exception = assertThrows(CompanyValidationException.class, () -> companyService.createCompany(companyDTO));
 
         assertEquals("Company must have a registration code and a legal name", exception.getMessage());
-
     }
 
     @Test
-    @DisplayName("DeleteIndividual test")
-    void testDeleteIndividual() {
+    void testUpdateCompany_Success() {
+        Long participantId = 1L;
+        Company existingCompany = new Company(1L, 10L, "Weltweit Softwareentwicklung AS", "11629770", 22, "Bank Transfer", "No allergies");
+        CompanyDTO updatedCompanyDTO = new CompanyDTO(1L, 10L, "Weltweit Softwareentwicklung AS", "11629770", 25, "Card", "Updated Allergies");
+
+        when(companyRepository.findById(participantId)).thenReturn(Optional.of(existingCompany));
+        when(companyRepository.save(any(Company.class))).thenReturn(existingCompany);
+        when(eventRepository.existsById(10L)).thenReturn(true);
+
+        CompanyDTO updatedCompany = companyService.updateCompany(participantId, updatedCompanyDTO);
+
+        assertNotNull(updatedCompany);
+        assertEquals(25, updatedCompany.getNumberOfParticipants());
+        verify(companyRepository).save(existingCompany);
+    }
+
+    @Test
+    void testDeleteCompany_Success() {
         Long id = 1L;
+        when(companyRepository.existsById(id)).thenReturn(true);
 
         companyService.deleteCompany(id);
 
-        Mockito.verify(companyRepository, Mockito.times(1)).deleteById(id);
+        verify(companyRepository).deleteById(id);
+    }
+
+    @Test
+    void testDeleteCompany_NotFound() {
+        Long id = 1L;
+        when(companyRepository.existsById(id)).thenReturn(false);
+
+        CompanyNotFoundException exception = assertThrows(CompanyNotFoundException.class, () -> companyService.deleteCompany(id));
+
+        assertEquals("Company not found with participant-ID: 1", exception.getMessage());
+        verify(companyRepository, never()).deleteById(id);
     }
 }
