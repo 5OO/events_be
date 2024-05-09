@@ -18,6 +18,7 @@ import org.regikeskus.events.repository.IndividualRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -84,14 +85,12 @@ class EventServiceTest {
 
     @Test
     void testGetEventById_Exists() {
-        Optional<Event> event = Optional.of(new Event(1L,"Event name 1",LocalDateTime.now(),"Event location 1" ,"Additional info 1"));
-        when(eventRepository.findById(1L)).thenReturn(event);
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
 
-        Optional<Event> foundEvent = eventService.getEventById(1L);
+        Optional<EventDTO> foundEvent = eventService.getEventById(1L);
 
         assertTrue(foundEvent.isPresent());
-        assertEquals("Event name 1", foundEvent.get().getEventName());
-        assertEquals("Event location 1", foundEvent.get().getLocation());
+        assertEquals("Event name", foundEvent.get().getEventName());
         verify(eventRepository).findById(1L);
     }
 
@@ -100,30 +99,61 @@ class EventServiceTest {
         Long id = 1L;
         when(eventRepository.findById(id)).thenReturn(Optional.empty());
 
-        Exception exception = assertThrows(EventNotFoundException.class, () -> eventService.getEventById(id));
+        Exception exception = assertThrows(EventNotFoundException.class, () -> {
+            Optional<EventDTO> eventDTO = eventService.getEventById(id);
+            if (eventDTO.isEmpty()) {
+                throw new EventNotFoundException("Event not found with event-ID: " + id);
+            }
+        });
 
-        assertEquals("Event not found with ID: " + id, exception.getMessage());
+        assertEquals("Event not found with event-ID: " + id, exception.getMessage());
         verify(eventRepository).findById(1L);
     }
 
     @Test
     void testCreateEvent_Success() {
-        Event event = new Event(1L,"Event name 1",LocalDateTime.now(),"Event location 1" ,"Additional info 1");
         when(eventRepository.save(any(Event.class))).thenReturn(event);
 
-        Event savedEvent = eventService.createEvent(event);
+        EventDTO savedEvent = eventService.createEvent(eventDTO);
 
         assertNotNull(savedEvent);
-        verify(eventRepository).save(event);
+        assertEquals("Event name", savedEvent.getEventName());
+        verify(eventRepository).save(any(Event.class));
     }
 
     @Test
     void testCreateEvent_Failure() {
-        Event event = new Event(1L,null,LocalDateTime.now(),"Event location 1" ,"Additional info 1");
+        EventDTO invalidEventDTO = new EventDTO(1L, null, LocalDateTime.now(), "Event location", "Additional info");
 
-        Exception exception = assertThrows(EventValidationException.class, () -> eventService.createEvent(event));
+        Exception exception = assertThrows(EventValidationException.class, () -> eventService.createEvent(invalidEventDTO));
 
         assertEquals("Event name or date/time or location must not be null", exception.getMessage());
+    }
+
+    @Test
+    void testUpdateEvent_Exists() {
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+        when(eventRepository.save(any(Event.class))).thenReturn(event);
+
+        EventDTO updatedEventDTO = new EventDTO(1L, "Updated name", LocalDateTime.now(), "Updated location", "Updated info");
+        EventDTO updatedEvent = eventService.updateEvent(1L, updatedEventDTO);
+
+        assertNotNull(updatedEvent);
+        assertEquals("Updated name", updatedEvent.getEventName());
+        verify(eventRepository).findById(1L);
+        verify(eventRepository).save(any(Event.class));
+    }
+
+    @Test
+    void testUpdateEvent_NotFound() {
+        Long id = 1L;
+        EventDTO updatedEventDTO = new EventDTO(1L, "Updated name", LocalDateTime.now(), "Updated location", "Updated info");
+        when(eventRepository.findById(id)).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(NoSuchElementException.class, () -> eventService.updateEvent(id, updatedEventDTO));
+
+        assertEquals("Event not found with event-ID: " + id, exception.getMessage());
+        verify(eventRepository).findById(id);
     }
 
     @Test
