@@ -96,8 +96,8 @@ public class EventService {
         event.setEventDateTime(eventDTO.getEventDateTime());
         event.setLocation(eventDTO.getLocation());
         event.setAdditionalInfo(eventDTO.getAdditionalInfo());
-        Event updatdEvent = eventRepository.save(event);
-        return mapToEventDTO(updatdEvent);
+        Event updatedEvent = eventRepository.save(event);
+        return mapToEventDTO(updatedEvent);
     }
 
     private void validateEvent(EventDTO event) {

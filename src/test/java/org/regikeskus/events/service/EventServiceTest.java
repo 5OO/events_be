@@ -1,14 +1,19 @@
 package org.regikeskus.events.service;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.regikeskus.events.dto.EventDTO;
+import org.regikeskus.events.dto.EventWithParticipantsDTO;
 import org.regikeskus.events.exception.EventNotFoundException;
 import org.regikeskus.events.exception.EventValidationException;
 import org.regikeskus.events.model.Event;
+import org.regikeskus.events.repository.CompanyRepository;
 import org.regikeskus.events.repository.EventRepository;
+import org.regikeskus.events.repository.IndividualRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -28,19 +33,53 @@ class EventServiceTest {
     @Mock
     private EventRepository eventRepository;
 
-    @Test
-    void testGetAllEvents() {
-        List<Event> events = new ArrayList<>();
-        events.add(new Event(1L,"Event name 1",LocalDateTime.now(),"Event location 1" ,"Additional info 1"));
-        events.add(new Event(2L, "Event name 2",LocalDateTime.now(),"Event location 2" ,"Additional info 2"));
-        when(eventRepository.findAll()).thenReturn(events);
+    @Mock
+    private IndividualRepository individualRepository;
 
-        List<Event> retrievedEvents = eventService.getAllEvents();
+    @Mock
+    private CompanyRepository companyRepository;
+
+    private EventDTO eventDTO;
+    private Event event;
+
+    @BeforeEach
+    void setup() {
+        eventDTO = new EventDTO(1L, "Event name", LocalDateTime.now(), "Event location", "Additional info");
+        event = new Event(1L, "Event name", LocalDateTime.now(), "Event location", "Additional info");
+    }
+
+    @Test
+    void testGetAllFutureOrCurrentEvents() {
+        List<Event> events = new ArrayList<>();
+        events.add(new Event(1L, "Event name 1", LocalDateTime.now().plusDays(1), "Event location 1", "Additional info 1"));
+        events.add(new Event(2L, "Event name 2", LocalDateTime.now().plusDays(2), "Event location 2", "Additional info 2"));
+        when(eventRepository.findAllFutureOrCurrentEvents(any(LocalDateTime.class))).thenReturn(events);
+        when(individualRepository.countByEventId(anyLong())).thenReturn(2L);
+        when(companyRepository.sumNumberOfParticipantsByEventId(anyLong())).thenReturn(3L);
+
+        List<EventWithParticipantsDTO> retrievedEvents = eventService.getAllFutureOrCurrentEvents();
 
         assertNotNull(retrievedEvents);
         assertEquals(2, retrievedEvents.size());
-        assertEquals(events, retrievedEvents);
-        verify(eventRepository).findAll();
+        assertEquals(5, retrievedEvents.getFirst().getTotalParticipants());
+        verify(eventRepository).findAllFutureOrCurrentEvents(any(LocalDateTime.class));
+        verify(individualRepository, times(2)).countByEventId(anyLong());
+        verify(companyRepository, times(2)).sumNumberOfParticipantsByEventId(anyLong());
+    }
+
+    @Test
+    void testGetAllPastEvents() {
+        List<Event> events = new ArrayList<>();
+        events.add(new Event(1L, "Past Event", LocalDateTime.now().minusDays(1), "Past Location", "Details"));
+        events.add(new Event(2L, "Past Event 2", LocalDateTime.now().minusDays(2), "Past Location 2", "Details 2"));
+        when(eventRepository.findAllPastEvents(any(LocalDateTime.class))).thenReturn(events);
+
+        List<EventDTO> retrievedEvents = eventService.getAllPastEvents();
+
+        assertNotNull(retrievedEvents);
+        assertEquals(2, retrievedEvents.size());
+        assertEquals("Past Event", retrievedEvents.getFirst().getEventName());
+        verify(eventRepository).findAllPastEvents(any(LocalDateTime.class));
     }
 
     @Test
