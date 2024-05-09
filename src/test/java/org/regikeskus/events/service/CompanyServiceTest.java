@@ -35,12 +35,43 @@ class CompanyServiceTest {
     private EventRepository eventRepository;
 
     private List<Company> companies;
+    private Company company;
 
     @BeforeEach
     void setUp() {
         companies = new ArrayList<>();
         companies.add(new Company(1L, 10L, "Weltweit Softwareentwicklung AS", "11629770", 22, "Bank Transfer", "No allergies"));
         companies.add(new Company(2L, 10L, "WeltWeitWeb AS", "16228231", 33, "Cash", "Vegetarian"));
+        company = new Company(1L, 10L, "Weltweit Softwareentwicklung AS", "11629770", 22, "Bank Transfer", "No allergies");
+    }
+
+    @Test
+    void testGetCompanyByIdAndEventId_Exists() {
+        Long participantId = 1L;
+        Long eventId = 10L;
+
+        when(companyRepository.findByParticipantIdAndEventId(participantId, eventId)).thenReturn(Optional.of(company));
+
+        CompanyDTO foundCompany = companyService.getCompanyByIdAndEventId(participantId, eventId);
+
+        assertNotNull(foundCompany);
+        assertEquals("Weltweit Softwareentwicklung AS", foundCompany.getLegalName());
+        assertEquals("11629770", foundCompany.getRegistrationCode());
+        assertEquals(22, foundCompany.getNumberOfParticipants());
+        verify(companyRepository).findByParticipantIdAndEventId(participantId, eventId);
+    }
+
+    @Test
+    void testGetCompanyByIdAndEventId_NotFound() {
+        Long participantId = 1L;
+        Long eventId = 10L;
+
+        when(companyRepository.findByParticipantIdAndEventId(participantId, eventId)).thenReturn(Optional.empty());
+
+        CompanyNotFoundException exception = assertThrows(CompanyNotFoundException.class, () -> companyService.getCompanyByIdAndEventId(participantId, eventId));
+
+        assertEquals("Company not found with participant-ID: 1", exception.getMessage());
+        verify(companyRepository).findByParticipantIdAndEventId(participantId, eventId);
     }
 
     @Test

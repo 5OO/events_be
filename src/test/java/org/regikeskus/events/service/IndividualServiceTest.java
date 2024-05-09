@@ -35,7 +35,6 @@ class IndividualServiceTest {
     @Mock
     private EventRepository eventRepository;
     private Individual individual;
-    private IndividualDTO individualDTO;
     private List<Individual> individuals;
 
     @BeforeEach
@@ -45,7 +44,6 @@ class IndividualServiceTest {
         individuals.add(new Individual(2L, 10L, "Kati", "Saar", "60010123456", "Cash", "Vegetarian"));
 
         individual = new Individual(1L, 10L, "Kalju", "Saar", "51107121760", "Bank Transfer", "No allergies");
-        individualDTO = new IndividualDTO(1L, 10L, "Kalju", "Saar", "51107121760", "Bank Transfer", "No allergies");
     }
 
 
