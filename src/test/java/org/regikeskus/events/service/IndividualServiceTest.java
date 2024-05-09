@@ -1,13 +1,17 @@
 package org.regikeskus.events.service;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.regikeskus.events.dto.IndividualDTO;
+import org.regikeskus.events.exception.IndividualNotFoundException;
+import org.regikeskus.events.exception.IndividualValidationException;
 import org.regikeskus.events.model.Individual;
+import org.regikeskus.events.repository.EventRepository;
 import org.regikeskus.events.repository.IndividualRepository;
 
 import java.util.ArrayList;
@@ -16,8 +20,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class IndividualServiceTest {
@@ -28,31 +31,41 @@ class IndividualServiceTest {
     @Mock
     private IndividualRepository individualRepository;
 
-    @Test
-    void testGetAllIndividuals() {
-        List<Individual> individuals = new ArrayList<>();
-        individuals.add(new Individual(1L, null, "Kalju", "Saar", "12345678901", "Bank Transfer", "No allergies"));
-        individuals.add(new Individual(2L, null, "Kati", "Saar", "23456789012", "Cash", "Vegetarian"));
-        when(individualRepository.findAll()).thenReturn(individuals);
 
-        List<Individual> retrievedIndividuals = individualService.getAllIndividuals();
+    @Mock
+    private EventRepository eventRepository;
+
+    private List<Individual> individuals;
+
+    @BeforeEach
+    void setUp() {
+        individuals = new ArrayList<>();
+        individuals.add(new Individual(1L, 10L, "Kalju", "Saar", "51107121760", "Bank Transfer", "No allergies"));
+        individuals.add(new Individual(2L, 10L, "Kati", "Saar", "60010123456", "Cash", "Vegetarian"));
+    }
+
+    @Test
+    void testGetIndividualsByEventId() {
+        Long eventId = 10L;
+        when(individualRepository.findByEventId(eventId)).thenReturn(individuals);
+
+        List<IndividualDTO> retrievedIndividuals = individualService.getIndividualsByEventId(eventId);
 
         assertNotNull(retrievedIndividuals);
         assertEquals(2, retrievedIndividuals.size());
-        assertEquals(individuals, retrievedIndividuals);
-        verify(individualRepository).findAll();
+        verify(individualRepository).findByEventId(eventId);
     }
 
     @Test
     void testGetIndividualById_Exists() {
-        Optional<Individual> individual = Optional.of(new Individual(1L, null, "Kalju", "Saar", "12345678901", "Bank Transfer", "No allergies"));
-        when(individualRepository.findById(1L)).thenReturn(individual);
+        Individual individual = new Individual(1L, 10L, "Kalju", "Saar", "51107121760", "Bank Transfer", "No allergies");
+        when(individualRepository.findById(1L)).thenReturn(Optional.of(individual));
 
-        Optional<Individual> foundIndividual = individualService.getIndividualById(1L);
+        IndividualDTO foundIndividual = individualService.getIndividualById(1L);
 
-        assertTrue(foundIndividual.isPresent());
-        assertEquals("Kalju", foundIndividual.get().getFirstName());
-        assertEquals("12345678901", foundIndividual.get().getPersonalID());
+        assertNotNull(foundIndividual);
+        assertEquals("Kalju", foundIndividual.getFirstName());
+        assertEquals("51107121760", foundIndividual.getPersonalID());
         verify(individualRepository).findById(1L);
     }
 
@@ -60,52 +73,84 @@ class IndividualServiceTest {
     void testGetIndividualById_NotFound() {
         when(individualRepository.findById(1L)).thenReturn(Optional.empty());
 
-        Optional<Individual> foundIndividual = individualService.getIndividualById(1L);
+        IndividualNotFoundException exception = assertThrows(IndividualNotFoundException.class, () -> individualService.getIndividualById(1L));
 
-        assertFalse(foundIndividual.isPresent());
+        assertEquals("Individual not found with participant-ID: 1", exception.getMessage());
         verify(individualRepository).findById(1L);
     }
 
     @Test
     void testCreateIndividual_Success() {
-        Individual individual = new Individual(1L, null, "Kalju", "Saar", "51107121760", "Bank Transfer", "No allergies");
-        when(individualRepository.save(any(Individual.class))).thenReturn(individual);
+        IndividualDTO individualDTO = new IndividualDTO(1L, 10L, "Kalju", "Saar", "51107121760", "Bank Transfer", "No allergies");
+        Individual individual = new Individual(1L, 10L, "Kalju", "Saar", "51107121760", "Bank Transfer", "No allergies");
 
-        Individual savedIndividual = individualService.createIndividual(individual);
+        when(individualRepository.save(any(Individual.class))).thenReturn(individual);
+        when(eventRepository.existsById(10L)).thenReturn(true);
+
+        IndividualDTO savedIndividual = individualService.createIndividual(individualDTO);
 
         assertNotNull(savedIndividual);
+        assertEquals(individualDTO.getFirstName(), savedIndividual.getFirstName());
         verify(individualRepository).save(individual);
     }
 
     @Test
-    @DisplayName("createOrUpdateIndividual test fails with missing Name")
+    @DisplayName("createOrUpdateIndividual test fails with missing name")
     void testCreateIndividual_FailureMissingName() {
-        Individual individual = new Individual(1L, null, null, "Saar", "51107121760", "Bank Transfer", "No allergies");
+        IndividualDTO individualDTO = new IndividualDTO(1L, 10L, null, "Saar", "51107121760", "Bank Transfer", "No allergies");
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> individualService.createIndividual(individual));
+        Exception exception = assertThrows(IndividualValidationException.class, () -> individualService.createIndividual(individualDTO));
 
-        assertEquals("Individuals must have Name", exception.getMessage());
-
+        assertEquals("First name and last name must not be null.", exception.getMessage());
     }
 
     @Test
-    @DisplayName("createOrUpdateIndividual test fails with Personal ID")
-    void testCreateIndividual_FailurePersonalId() {
-        Individual individual = new Individual(1L, null, "Kalju", "Saar", "12345678901", "Bank Transfer", "No allergies");
+    @DisplayName("createOrUpdateIndividual test fails with invalid Personal ID")
+    void testCreateIndividual_FailureInvalidPersonalId() {
+        IndividualDTO individualDTO = new IndividualDTO(1L, 10L, "Kalju", "Saar", "12345678901", "Bank Transfer", "No allergies");
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> individualService.createIndividual(individual));
+        Exception exception = assertThrows(IndividualValidationException.class, () -> individualService.createIndividual(individualDTO));
 
-        assertEquals("Invalid Estonian Personal ID.", exception.getMessage());
-
+        assertEquals("Invalid Estonian Personal ID. 12345678901", exception.getMessage());
     }
 
     @Test
-    @DisplayName("DeleteIndividual test")
+    void testUpdateIndividual_Success() {
+        Long participantId = 1L;
+        Individual existingIndividual = new Individual(1L, 10L, "Kalju", "Saar", "51107121760", "Bank Transfer", "No allergies");
+        IndividualDTO updatedIndividualDTO = new IndividualDTO(1L, 10L, "Kalju", "Saar", "51107121760", "Card", "Vegetarian");
+
+        when(individualRepository.findById(participantId)).thenReturn(Optional.of(existingIndividual));
+        when(individualRepository.save(any(Individual.class))).thenReturn(existingIndividual);
+        when(eventRepository.existsById(10L)).thenReturn(true);
+
+        IndividualDTO updatedIndividual = individualService.updateIndividual(participantId, updatedIndividualDTO);
+
+        assertNotNull(updatedIndividual);
+        assertEquals("Card", updatedIndividual.getPaymentMethod());
+        verify(individualRepository).save(existingIndividual);
+    }
+
+    @Test
+    @DisplayName("Delete individual test")
     void testDeleteIndividual() {
         Long id = 1L;
+        when(individualRepository.existsById(id)).thenReturn(true);
 
         individualService.deleteIndividual(id);
 
-        Mockito.verify(individualRepository, Mockito.times(1)).deleteById(id);
+        verify(individualRepository).deleteById(id);
+    }
+
+    @Test
+    @DisplayName("Delete individual not found test")
+    void testDeleteIndividual_NotFound() {
+        Long id = 1L;
+        when(individualRepository.existsById(id)).thenReturn(false);
+
+        IndividualNotFoundException exception = assertThrows(IndividualNotFoundException.class, () -> individualService.deleteIndividual(id));
+
+        assertEquals("Individual not found with participant-ID: 1", exception.getMessage());
+        verify(individualRepository, never()).deleteById(id);
     }
 }
