@@ -6,11 +6,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.regikeskus.events.dto.AggregatedParticipantDTO;
 import org.regikeskus.events.dto.EventDTO;
+import org.regikeskus.events.dto.EventWithAggregatedParticipantsDTO;
 import org.regikeskus.events.dto.EventWithParticipantsDTO;
 import org.regikeskus.events.exception.EventNotFoundException;
 import org.regikeskus.events.exception.EventValidationException;
+import org.regikeskus.events.model.Company;
 import org.regikeskus.events.model.Event;
+import org.regikeskus.events.model.Individual;
 import org.regikeskus.events.repository.CompanyRepository;
 import org.regikeskus.events.repository.EventRepository;
 import org.regikeskus.events.repository.IndividualRepository;
@@ -41,12 +45,54 @@ class EventServiceTest {
     private CompanyRepository companyRepository;
 
     private EventDTO eventDTO;
-    private Event event;
+    private Event event, event2;
+    private Individual individual1, individual2;
+    private Company company1, company2;
 
     @BeforeEach
     void setup() {
         eventDTO = new EventDTO(1L, "Event name", LocalDateTime.now(), "Event location", "Additional info");
         event = new Event(1L, "Event name", LocalDateTime.now(), "Event location", "Additional info");
+        event2 = new Event(1L, "Art Workshop", LocalDateTime.now().plusDays(10), "Art Gallery, Tartu", "A hands-on workshop for aspiring artists.");
+        individual1 = new Individual(36L, 1L, "Julia", "Kask", "49403136515", "bank transfer", "Interested in watercolor techniques.");
+        individual2 = new Individual(37L, 1L, "Jane", "Doe", "49403136525", "cash", "Beginner.");
+        company1 = new Company(1L, 1L, "Innovative Tech OÜ", "12345678", 5, "bank transfer", "Brochures needed.");
+        company2 = new Company(2L, 1L, "GreenTech AS", "87654321", 3, "cash", "Bring badges.");
+    }
+
+    @Test
+    void testGetEventWithAggregatedParticipants_Success() {
+        List<Individual> individuals = List.of(individual1, individual2);
+        List<Company> companies = List.of(company1, company2);
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event2));
+        when(individualRepository.findByEventId(1L)).thenReturn(individuals);
+        when(companyRepository.findByEventId(1L)).thenReturn(companies);
+
+        EventWithAggregatedParticipantsDTO result = eventService.getEventWithAggregatedParticipants(1L);
+
+        assertNotNull(result);
+        assertEquals(1L, result.getEventId());
+        assertEquals("Art Workshop", result.getEventName());
+        assertEquals(4, result.getParticipants().size());
+
+        List<AggregatedParticipantDTO> participants = result.getParticipants();
+        assertEquals("Julia Kask", participants.get(0).getName());
+        assertEquals("company", participants.get(2).getParticipantType());
+
+        verify(eventRepository).findById(1L);
+        verify(individualRepository).findByEventId(1L);
+        verify(companyRepository).findByEventId(1L);
+    }
+
+    @Test
+    void testGetEventWithAggregatedParticipants_EventNotFound() {
+        when(eventRepository.findById(999L)).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(EventNotFoundException.class, () -> eventService.getEventWithAggregatedParticipants(999L));
+
+        assertEquals("Event not found with ID: 999", exception.getMessage());
+        verify(eventRepository).findById(999L);
     }
 
     @Test
