@@ -79,6 +79,7 @@ public class IndividualService {
             throw new IndividualValidationException("First name and last name must not be null.");
         }
         if (!IdValidationUtils.isValidEstonianPersonalId(individualDTO.getPersonalID())) {
+            log.debug("Invalid Estonian Personal ID {}", individualDTO.getPersonalID());
             throw new IndividualValidationException("Invalid Estonian Personal ID. " + individualDTO.getPersonalID());
         }
         if (!eventRepository.existsById(individualDTO.getEventId())) {
