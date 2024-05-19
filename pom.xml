@@ -10,7 +10,7 @@
     </parent>
     <groupId>org.regikeskus</groupId>
     <artifactId>events</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.21</version>
     <name>events</name>
     <description>events</description>
     <properties>
