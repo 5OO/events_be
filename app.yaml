@@ -4,6 +4,9 @@ env: flex
 beta_settings:
   cloud_sql_instances: endless-science-423309-v2:europe-north1:syndmused-app-andmebaas
 
+env_variables:
+  SPRING_PROFILES_ACTIVE: cloud
+
 manual_scaling:
   instances: 1
 
