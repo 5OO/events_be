@@ -1,0 +1,13 @@
+runtime: custom
+env: flex
+
+beta_settings:
+  cloud_sql_instances: endless-science-423309-v2:europe-north1:syndmused-app-andmebaas
+
+manual_scaling:
+  instances: 1
+
+resources:
+  cpu: 1
+  memory_gb: 2.3
+  disk_size_gb: 10
